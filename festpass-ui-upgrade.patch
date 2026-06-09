@@ -1,0 +1,2486 @@
+diff --git a/README.md b/README.md
+index 0639c56..3841cd0 100644
+--- a/README.md
++++ b/README.md
+@@ -1,113 +1,137 @@
+-# College Fest Token System with MongoDB
++# FestPass — College Fest Token System
+ 
+-This is an automated token system for college fests built with Next.js, React, and MongoDB.
++A full-stack automated token generation and QR-based entry validation system for college fests. Built with **Next.js 14**, **MongoDB**, **TypeScript**, and **Tailwind CSS**.
+ 
+-## Features
++**Live Demo:** [v0-automated-token-system.vercel.app](https://v0-automated-token-system.vercel.app/)
+ 
+-- Student registration with unique ID generation
+-- QR code generation and validation
+-- Real-time analytics dashboard
+-- MongoDB integration for persistent data storage
+-- RESTful API endpoints
+-- Responsive design with Tailwind CSS
++---
+ 
+-## Setup Instructions
++## Features
+ 
+-### 1. Install Dependencies
++- **Student Registration** — Form-based registration with server-side validation and duplicate email detection. Each registrant receives a unique fest ID (`FEST-{timestamp}-{random}`).
++- **QR Code Generation** — Canvas-based QR code generation per student, downloadable as PNG and shareable via the Web Share API.
++- **Entry Validation** — Camera-based QR scanning and manual ID lookup for validating student entries at the gate. Prevents double validation.
++- **Analytics Dashboard** — Real-time statistics including role breakdowns, validation rates, top colleges by registration count, and 24-hour activity tracking.
++- **RESTful API** — Full CRUD operations with search, filter, and aggregation endpoints.
++- **Responsive UI** — Mobile-first design with persistent navigation, consistent design tokens, and accessible components via shadcn/ui.
++
++## Tech Stack
++
++| Layer       | Technology                          |
++|-------------|-------------------------------------|
++| Framework   | Next.js 14 (App Router)             |
++| Language    | TypeScript                          |
++| Styling     | Tailwind CSS + shadcn/ui            |
++| Database    | MongoDB (native driver)             |
++| API         | Next.js API Routes (RESTful)        |
++| Deployment  | Vercel                              |
++| QR Codes    | HTML Canvas API                     |
+ 
+-\`\`\`bash
+-npm install
+-\`\`\`
++## API Endpoints
+ 
+-### 2. Set up MongoDB
++| Method | Endpoint                | Description                                  |
++|--------|-------------------------|----------------------------------------------|
++| GET    | `/api/students`         | List all students (supports `?search=` and `?role=` params) |
++| POST   | `/api/students`         | Register a new student                        |
++| GET    | `/api/students/[id]`    | Get a single student by fest ID               |
++| POST   | `/api/validate`         | Validate a student entry                      |
++| GET    | `/api/validate/recent`  | Get recent validation scans                   |
++| GET    | `/api/analytics`        | Aggregated registration and validation stats  |
+ 
+-#### Option A: Local MongoDB
+-1. Install MongoDB locally
+-2. Start MongoDB service
+-3. Use connection string: `mongodb://localhost:27017/college-fest`
++## Database Schema
+ 
+-#### Option B: MongoDB Atlas (Cloud)
+-1. Create a MongoDB Atlas account
+-2. Create a new cluster
+-3. Get your connection string
+-4. Replace the MONGODB_URI in .env.local
++### Students Collection
+ 
+-### 3. Environment Variables
++```json
++{
++  "id": "FEST-1718901234567-042",
++  "name": "string",
++  "email": "string (unique)",
++  "phone": "string",
++  "college": "string",
++  "role": "participant | volunteer | organizer | judge | sponsor",
++  "registeredAt": "Date",
++  "validated": "boolean",
++  "validatedAt": "Date | null"
++}
++```
+ 
+-Create a `.env.local` file in the root directory:
++### Validation Scans Collection
+ 
+-\`\`\`env
+-MONGODB_URI=mongodb://localhost:27017/college-fest
+-NEXTAUTH_SECRET=your-secret-key-here
+-NEXTAUTH_URL=http://localhost:3000
+-\`\`\`
++```json
++{
++  "studentId": "string",
++  "scannedAt": "Date",
++  "scannedBy": "string | null",
++  "method": "qr | manual"
++}
++```
+ 
+-### 4. Run the Application
++## Getting Started
+ 
+-\`\`\`bash
+-npm run dev
+-\`\`\`
++### Prerequisites
+ 
+-Open [http://localhost:3000](http://localhost:3000) in your browser.
++- Node.js 18+
++- MongoDB (local or Atlas)
+ 
+-## API Endpoints
++### Installation
+ 
+-- `GET /api/students` - Get all students (with search and filter)
+-- `POST /api/students` - Create new student
+-- `GET /api/students/[id]` - Get student by ID
+-- `POST /api/validate` - Validate student entry
+-- `GET /api/validate/recent` - Get recent validation scans
+-- `GET /api/analytics` - Get analytics data
++```bash
++git clone https://github.com/hamzah10999/college-fest-system.git
++cd college-fest-system
++npm install
++```
+ 
+-## Database Schema
++### Environment Variables
+ 
+-### Students Collection
+-\`\`\`javascript
+-{
+-  _id: ObjectId,
+-  id: String, // Unique fest ID (FEST-timestamp-random)
+-  name: String,
+-  email: String,
+-  phone: String,
+-  college: String,
+-  role: String, // participant, volunteer, organizer, judge, sponsor
+-  registeredAt: Date,
+-  validated: Boolean,
+-  validatedAt: Date,
+-  qrCodeData: String
+-}
+-\`\`\`
++Create a `.env.local` file:
+ 
+-### Validation Scans Collection
+-\`\`\`javascript
+-{
+-  _id: ObjectId,
+-  studentId: String,
+-  scannedAt: Date,
+-  scannedBy: String,
+-  method: String // 'qr' or 'manual'
+-}
+-\`\`\`
++```env
++MONGODB_URI=mongodb://localhost:27017/college-fest
++NEXTAUTH_SECRET=your-secret-key-here
++NEXTAUTH_URL=http://localhost:3000
++```
++
++### Run
+ 
+-## Technologies Used
++```bash
++npm run dev
++```
+ 
+-- **Frontend**: Next.js 14, React 18, TypeScript
+-- **Styling**: Tailwind CSS, shadcn/ui
+-- **Database**: MongoDB with native driver
+-- **API**: Next.js API Routes
+-- **Validation**: Server-side validation
+-- **QR Codes**: Canvas-based generation
++Open [http://localhost:3000](http://localhost:3000).
+ 
+ ## Deployment
+ 
+-### Vercel Deployment
+-1. Push code to GitHub
+-2. Connect repository to Vercel
+-3. Add environment variables in Vercel dashboard
++1. Push to GitHub
++2. Connect the repository to Vercel
++3. Add environment variables in the Vercel dashboard
+ 4. Deploy
+ 
+-### Environment Variables for Production
+-\`\`\`env
+-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/college-fest
+-NEXTAUTH_SECRET=production-secret-key
+-NEXTAUTH_URL=https://your-domain.vercel.app
++## Project Structure
++
++```
++├── app/
++│   ├── api/              # RESTful API routes
++│   │   ├── students/     # Student CRUD endpoints
++│   │   ├── validate/     # Validation endpoints
++│   │   └── analytics/    # Aggregation endpoint
++│   ├── register/         # Registration form page
++│   ├── students/         # Student list + detail pages
++│   ├── validate/         # QR scanner + manual validation
++│   ├── analytics/        # Dashboard with charts
++│   ├── layout.tsx        # Root layout with Navbar + Footer
++│   └── page.tsx          # Landing page
++├── components/
++│   ├── ui/               # shadcn/ui component library
++│   ├── navbar.tsx         # Persistent navigation
++│   └── footer.tsx         # Site footer
++├── lib/
++│   ├── models/           # TypeScript interfaces
++│   ├── services/         # Business logic (StudentService)
++│   └── mongodb.ts        # Database connection singleton
++└── hooks/                # Custom React hooks
++```
++
++## License
++
++MIT
+diff --git a/app/analytics/page.tsx b/app/analytics/page.tsx
+index 66d572f..9687591 100644
+--- a/app/analytics/page.tsx
++++ b/app/analytics/page.tsx
+@@ -3,19 +3,7 @@
+ import { useState, useEffect } from "react"
+ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+ import { Badge } from "@/components/ui/badge"
+-import { ArrowLeft, Users, CheckCircle, XCircle, TrendingUp } from "lucide-react"
+-import Link from "next/link"
+-
+-interface Student {
+-  id: string
+-  name: string
+-  email: string
+-  phone: string
+-  college: string
+-  role: string
+-  registeredAt: string
+-  validated: boolean
+-}
++import { Users, CheckCircle, XCircle, TrendingUp, BarChart3 } from "lucide-react"
+ 
+ interface RoleStats {
+   role: string
+@@ -24,11 +12,24 @@ interface RoleStats {
+   percentage: number
+ }
+ 
++const roleBadge: Record<string, string> = {
++  participant: "bg-indigo-50 text-indigo-700 border-indigo-200",
++  volunteer: "bg-emerald-50 text-emerald-700 border-emerald-200",
++  organizer: "bg-violet-50 text-violet-700 border-violet-200",
++  judge: "bg-amber-50 text-amber-700 border-amber-200",
++  sponsor: "bg-rose-50 text-rose-700 border-rose-200",
++}
++
++const roleBarColor: Record<string, string> = {
++  participant: "bg-indigo-500",
++  volunteer: "bg-emerald-500",
++  organizer: "bg-violet-500",
++  judge: "bg-amber-500",
++  sponsor: "bg-rose-500",
++}
++
+ export default function AnalyticsPage() {
+-  const [students, setStudents] = useState<Student[]>([])
+   const [roleStats, setRoleStats] = useState<RoleStats[]>([])
+-
+-  // Add these state variables at the top of the component
+   const [totalStudents, setTotalStudents] = useState(0)
+   const [validatedStudents, setValidatedStudents] = useState(0)
+   const [pendingStudents, setPendingStudents] = useState(0)
+@@ -37,7 +38,6 @@ export default function AnalyticsPage() {
+   const [recentRegistrations, setRecentRegistrations] = useState(0)
+ 
+   useEffect(() => {
+-    // Load analytics from API
+     fetchAnalytics()
+   }, [])
+ 
+@@ -48,17 +48,14 @@ export default function AnalyticsPage() {
+ 
+       if (response.ok) {
+         const { analytics } = data
+-        setStudents([]) // We don't need individual students for analytics
+         setRoleStats(
+           analytics.roleStats.map((stat: any) => ({
+             role: stat.role,
+             total: stat.total,
+             validated: stat.validated,
+             percentage: Math.round(stat.percentage),
+-          })),
++          }))
+         )
+-
+-        // Set other analytics data
+         setTotalStudents(analytics.totalStudents)
+         setValidatedStudents(analytics.validatedStudents)
+         setPendingStudents(analytics.pendingStudents)
+@@ -71,117 +68,75 @@ export default function AnalyticsPage() {
+     }
+   }
+ 
+-  const getRoleBadgeColor = (role: string) => {
+-    const colors = {
+-      participant: "bg-blue-100 text-blue-800",
+-      volunteer: "bg-green-100 text-green-800",
+-      organizer: "bg-purple-100 text-purple-800",
+-      judge: "bg-orange-100 text-orange-800",
+-      sponsor: "bg-red-100 text-red-800",
+-    }
+-    return colors[role as keyof typeof colors] || "bg-gray-100 text-gray-800"
+-  }
+-
+-  // Update the helper functions to use state instead of calculating from students array
+-  const getRecentRegistrations = () => recentRegistrations
+-  const getTopColleges = () => topColleges
++  const statCards = [
++    { icon: Users, label: "Total Registrations", value: totalStudents, color: "text-indigo-600", bg: "bg-indigo-100" },
++    { icon: CheckCircle, label: "Validated Entries", value: validatedStudents, color: "text-emerald-600", bg: "bg-emerald-100" },
++    { icon: XCircle, label: "Pending Validation", value: pendingStudents, color: "text-amber-600", bg: "bg-amber-100" },
++    { icon: TrendingUp, label: "Validation Rate", value: `${validationRate}%`, color: "text-violet-600", bg: "bg-violet-100" },
++  ]
+ 
+   return (
+-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+-      <div className="container mx-auto max-w-6xl">
+-        <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6">
+-          <ArrowLeft className="h-4 w-4 mr-2" />
+-          Back to Home
+-        </Link>
+-
++    <div className="page-bg">
++      <div className="container mx-auto max-w-6xl px-4 py-12">
+         <div className="mb-8">
+-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Analytics Dashboard</h1>
+-          <p className="text-gray-600">Registration and validation statistics for the college fest</p>
++          <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-700 mb-4">
++            <BarChart3 className="h-6 w-6" />
++          </div>
++          <h1 className="text-2xl font-bold tracking-tight text-gray-900 mb-1">Analytics Dashboard</h1>
++          <p className="text-gray-500">Registration and validation statistics for the fest</p>
+         </div>
+ 
+-        {/* Overview Stats */}
+-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+-          <Card>
+-            <CardContent className="pt-6">
+-              <div className="flex items-center">
+-                <Users className="h-8 w-8 text-blue-600" />
+-                <div className="ml-4">
+-                  <p className="text-2xl font-bold text-gray-900">{totalStudents}</p>
+-                  <p className="text-sm text-gray-600">Total Registrations</p>
+-                </div>
+-              </div>
+-            </CardContent>
+-          </Card>
+-
+-          <Card>
+-            <CardContent className="pt-6">
+-              <div className="flex items-center">
+-                <CheckCircle className="h-8 w-8 text-green-600" />
+-                <div className="ml-4">
+-                  <p className="text-2xl font-bold text-gray-900">{validatedStudents}</p>
+-                  <p className="text-sm text-gray-600">Validated Entries</p>
+-                </div>
+-              </div>
+-            </CardContent>
+-          </Card>
+-
+-          <Card>
+-            <CardContent className="pt-6">
+-              <div className="flex items-center">
+-                <XCircle className="h-8 w-8 text-orange-600" />
+-                <div className="ml-4">
+-                  <p className="text-2xl font-bold text-gray-900">{pendingStudents}</p>
+-                  <p className="text-sm text-gray-600">Pending Validation</p>
+-                </div>
+-              </div>
+-            </CardContent>
+-          </Card>
+-
+-          <Card>
+-            <CardContent className="pt-6">
+-              <div className="flex items-center">
+-                <TrendingUp className="h-8 w-8 text-purple-600" />
+-                <div className="ml-4">
+-                  <p className="text-2xl font-bold text-gray-900">{validationRate}%</p>
+-                  <p className="text-sm text-gray-600">Validation Rate</p>
++        {/* Overview */}
++        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
++          {statCards.map((stat) => (
++            <Card key={stat.label}>
++              <CardContent className="pt-5 pb-4">
++                <div className="flex items-center gap-3">
++                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${stat.bg}`}>
++                    <stat.icon className={`h-5 w-5 ${stat.color}`} />
++                  </div>
++                  <div>
++                    <p className={`text-xl font-bold ${stat.color}`}>{stat.value}</p>
++                    <p className="text-xs text-gray-500">{stat.label}</p>
++                  </div>
+                 </div>
+-              </div>
+-            </CardContent>
+-          </Card>
++              </CardContent>
++            </Card>
++          ))}
+         </div>
+ 
+-        <div className="grid lg:grid-cols-2 gap-8">
+-          {/* Role Statistics */}
++        <div className="grid lg:grid-cols-2 gap-6">
++          {/* Role breakdown */}
+           <Card>
+-            <CardHeader>
+-              <CardTitle>Registration by Role</CardTitle>
+-              <CardDescription>Breakdown of students by their roles in the fest</CardDescription>
++            <CardHeader className="pb-3">
++              <CardTitle className="text-base">Registration by Role</CardTitle>
++              <CardDescription>Breakdown of roles and their validation status</CardDescription>
+             </CardHeader>
+             <CardContent>
+               <div className="space-y-4">
+                 {roleStats.map((stat) => (
+-                  <div key={stat.role} className="space-y-2">
+-                    <div className="flex items-center justify-between">
+-                      <div className="flex items-center space-x-2">
+-                        <Badge className={getRoleBadgeColor(stat.role)} variant="secondary">
++                  <div key={stat.role} className="space-y-1.5">
++                    <div className="flex items-center justify-between text-sm">
++                      <div className="flex items-center gap-2">
++                        <Badge variant="outline" className={roleBadge[stat.role] || ""}>
+                           {stat.role.charAt(0).toUpperCase() + stat.role.slice(1)}
+                         </Badge>
+-                        <span className="text-sm text-gray-600">
++                        <span className="text-gray-400">
+                           {stat.validated}/{stat.total} validated
+                         </span>
+                       </div>
+-                      <span className="text-sm font-medium">{stat.percentage}%</span>
++                      <span className="font-medium text-gray-700">{stat.percentage}%</span>
+                     </div>
+-                    <div className="w-full bg-gray-200 rounded-full h-2">
++                    <div className="w-full bg-gray-100 rounded-full h-2">
+                       <div
+-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
++                        className={`h-2 rounded-full transition-all duration-500 ${roleBarColor[stat.role] || "bg-gray-400"}`}
+                         style={{ width: `${stat.percentage}%` }}
+                       />
+                     </div>
+                   </div>
+                 ))}
+                 {roleStats.length === 0 && (
+-                  <p className="text-gray-500 text-center py-4">No registration data available</p>
++                  <p className="text-sm text-gray-400 text-center py-6">No data yet</p>
+                 )}
+               </div>
+             </CardContent>
+@@ -189,30 +144,25 @@ export default function AnalyticsPage() {
+ 
+           {/* Top Colleges */}
+           <Card>
+-            <CardHeader>
+-              <CardTitle>Top Colleges</CardTitle>
++            <CardHeader className="pb-3">
++              <CardTitle className="text-base">Top Colleges</CardTitle>
+               <CardDescription>Colleges with the most registrations</CardDescription>
+             </CardHeader>
+             <CardContent>
+-              <div className="space-y-4">
+-                {getTopColleges().map((college, index) => (
++              <div className="space-y-3">
++                {topColleges.map((college, index) => (
+                   <div key={college.college} className="flex items-center justify-between">
+-                    <div className="flex items-center space-x-3">
+-                      <div className="bg-blue-100 text-blue-800 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
++                    <div className="flex items-center gap-3 min-w-0">
++                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-700 text-xs font-bold">
+                         {index + 1}
+                       </div>
+-                      <div>
+-                        <p className="font-medium">{college.college}</p>
+-                        <p className="text-sm text-gray-600">{college.count} students</p>
+-                      </div>
+-                    </div>
+-                    <div className="text-right">
+-                      <p className="text-lg font-bold">{college.count}</p>
++                      <span className="text-sm font-medium truncate">{college.college}</span>
+                     </div>
++                    <span className="text-sm font-bold text-gray-700 shrink-0 ml-2">{college.count}</span>
+                   </div>
+                 ))}
+-                {getTopColleges().length === 0 && (
+-                  <p className="text-gray-500 text-center py-4">No college data available</p>
++                {topColleges.length === 0 && (
++                  <p className="text-sm text-gray-400 text-center py-6">No data yet</p>
+                 )}
+               </div>
+             </CardContent>
+@@ -220,41 +170,41 @@ export default function AnalyticsPage() {
+ 
+           {/* Recent Activity */}
+           <Card>
+-            <CardHeader>
+-              <CardTitle>Recent Activity</CardTitle>
+-              <CardDescription>Registration activity in the last 24 hours</CardDescription>
++            <CardHeader className="pb-3">
++              <CardTitle className="text-base">Recent Activity</CardTitle>
++              <CardDescription>Registrations in the last 24 hours</CardDescription>
+             </CardHeader>
+             <CardContent>
+               <div className="text-center py-8">
+-                <div className="text-4xl font-bold text-blue-600 mb-2">{getRecentRegistrations()}</div>
+-                <p className="text-gray-600">New registrations in the last 24 hours</p>
++                <div className="text-4xl font-bold text-indigo-600 mb-1">{recentRegistrations}</div>
++                <p className="text-sm text-gray-500">new registrations</p>
+               </div>
+             </CardContent>
+           </Card>
+ 
+           {/* Validation Progress */}
+           <Card>
+-            <CardHeader>
+-              <CardTitle>Validation Progress</CardTitle>
+-              <CardDescription>Overall validation status</CardDescription>
++            <CardHeader className="pb-3">
++              <CardTitle className="text-base">Validation Progress</CardTitle>
++              <CardDescription>Overall check-in status</CardDescription>
+             </CardHeader>
+             <CardContent>
+-              <div className="space-y-4">
+-                <div className="flex justify-between items-center">
+-                  <span className="text-sm font-medium">Progress</span>
+-                  <span className="text-sm text-gray-600">
++              <div className="space-y-3">
++                <div className="flex justify-between text-sm">
++                  <span className="text-gray-500">Progress</span>
++                  <span className="font-medium text-gray-700">
+                     {validatedStudents} of {totalStudents}
+                   </span>
+                 </div>
+-                <div className="w-full bg-gray-200 rounded-full h-4">
++                <div className="w-full bg-gray-100 rounded-full h-3">
+                   <div
+-                    className="bg-gradient-to-r from-green-500 to-green-600 h-4 rounded-full transition-all duration-500"
++                    className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-3 rounded-full transition-all duration-500"
+                     style={{ width: `${validationRate}%` }}
+                   />
+                 </div>
+-                <div className="text-center">
+-                  <p className="text-2xl font-bold text-green-600">{validationRate}%</p>
+-                  <p className="text-sm text-gray-600">Validation Complete</p>
++                <div className="text-center pt-2">
++                  <p className="text-2xl font-bold text-emerald-600">{validationRate}%</p>
++                  <p className="text-xs text-gray-500">complete</p>
+                 </div>
+               </div>
+             </CardContent>
+diff --git a/app/globals.css b/app/globals.css
+index ac68442..cec4649 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -2,10 +2,6 @@
+ @tailwind components;
+ @tailwind utilities;
+ 
+-body {
+-  font-family: Arial, Helvetica, sans-serif;
+-}
+-
+ @layer utilities {
+   .text-balance {
+     text-wrap: balance;
+@@ -14,73 +10,73 @@ body {
+ 
+ @layer base {
+   :root {
+-    --background: 0 0% 100%;
+-    --foreground: 0 0% 3.9%;
++    --background: 240 20% 99%;
++    --foreground: 240 10% 6%;
+     --card: 0 0% 100%;
+-    --card-foreground: 0 0% 3.9%;
++    --card-foreground: 240 10% 6%;
+     --popover: 0 0% 100%;
+-    --popover-foreground: 0 0% 3.9%;
+-    --primary: 0 0% 9%;
+-    --primary-foreground: 0 0% 98%;
+-    --secondary: 0 0% 96.1%;
+-    --secondary-foreground: 0 0% 9%;
+-    --muted: 0 0% 96.1%;
+-    --muted-foreground: 0 0% 45.1%;
+-    --accent: 0 0% 96.1%;
+-    --accent-foreground: 0 0% 9%;
+-    --destructive: 0 84.2% 60.2%;
++    --popover-foreground: 240 10% 6%;
++    --primary: 243 75% 59%;
++    --primary-foreground: 0 0% 100%;
++    --secondary: 240 20% 96%;
++    --secondary-foreground: 240 10% 20%;
++    --muted: 240 14% 95%;
++    --muted-foreground: 240 5% 46%;
++    --accent: 38 92% 50%;
++    --accent-foreground: 0 0% 100%;
++    --destructive: 0 84% 60%;
+     --destructive-foreground: 0 0% 98%;
+-    --border: 0 0% 89.8%;
+-    --input: 0 0% 89.8%;
+-    --ring: 0 0% 3.9%;
+-    --chart-1: 12 76% 61%;
+-    --chart-2: 173 58% 39%;
+-    --chart-3: 197 37% 24%;
+-    --chart-4: 43 74% 66%;
+-    --chart-5: 27 87% 67%;
+-    --radius: 0.5rem;
++    --border: 240 10% 90%;
++    --input: 240 10% 90%;
++    --ring: 243 75% 59%;
++    --chart-1: 243 75% 59%;
++    --chart-2: 160 60% 45%;
++    --chart-3: 38 92% 50%;
++    --chart-4: 280 65% 60%;
++    --chart-5: 340 75% 55%;
++    --radius: 0.75rem;
+     --sidebar-background: 0 0% 98%;
+     --sidebar-foreground: 240 5.3% 26.1%;
+-    --sidebar-primary: 240 5.9% 10%;
+-    --sidebar-primary-foreground: 0 0% 98%;
++    --sidebar-primary: 243 75% 59%;
++    --sidebar-primary-foreground: 0 0% 100%;
+     --sidebar-accent: 240 4.8% 95.9%;
+     --sidebar-accent-foreground: 240 5.9% 10%;
+     --sidebar-border: 220 13% 91%;
+-    --sidebar-ring: 217.2 91.2% 59.8%;
++    --sidebar-ring: 243 75% 59%;
+   }
+   .dark {
+-    --background: 0 0% 3.9%;
+-    --foreground: 0 0% 98%;
+-    --card: 0 0% 3.9%;
+-    --card-foreground: 0 0% 98%;
+-    --popover: 0 0% 3.9%;
+-    --popover-foreground: 0 0% 98%;
+-    --primary: 0 0% 98%;
+-    --primary-foreground: 0 0% 9%;
+-    --secondary: 0 0% 14.9%;
+-    --secondary-foreground: 0 0% 98%;
+-    --muted: 0 0% 14.9%;
+-    --muted-foreground: 0 0% 63.9%;
+-    --accent: 0 0% 14.9%;
+-    --accent-foreground: 0 0% 98%;
+-    --destructive: 0 62.8% 30.6%;
++    --background: 240 10% 4%;
++    --foreground: 0 0% 95%;
++    --card: 240 10% 7%;
++    --card-foreground: 0 0% 95%;
++    --popover: 240 10% 7%;
++    --popover-foreground: 0 0% 95%;
++    --primary: 243 75% 59%;
++    --primary-foreground: 0 0% 100%;
++    --secondary: 240 10% 14%;
++    --secondary-foreground: 0 0% 95%;
++    --muted: 240 6% 14%;
++    --muted-foreground: 240 4% 64%;
++    --accent: 38 92% 50%;
++    --accent-foreground: 0 0% 100%;
++    --destructive: 0 63% 31%;
+     --destructive-foreground: 0 0% 98%;
+-    --border: 0 0% 14.9%;
+-    --input: 0 0% 14.9%;
+-    --ring: 0 0% 83.1%;
+-    --chart-1: 220 70% 50%;
++    --border: 240 6% 18%;
++    --input: 240 6% 18%;
++    --ring: 243 75% 59%;
++    --chart-1: 243 75% 59%;
+     --chart-2: 160 60% 45%;
+-    --chart-3: 30 80% 55%;
++    --chart-3: 38 92% 50%;
+     --chart-4: 280 65% 60%;
+     --chart-5: 340 75% 55%;
+-    --sidebar-background: 240 5.9% 10%;
++    --sidebar-background: 240 10% 6%;
+     --sidebar-foreground: 240 4.8% 95.9%;
+-    --sidebar-primary: 224.3 76.3% 48%;
++    --sidebar-primary: 243 75% 59%;
+     --sidebar-primary-foreground: 0 0% 100%;
+-    --sidebar-accent: 240 3.7% 15.9%;
++    --sidebar-accent: 240 4% 16%;
+     --sidebar-accent-foreground: 240 4.8% 95.9%;
+-    --sidebar-border: 240 3.7% 15.9%;
+-    --sidebar-ring: 217.2 91.2% 59.8%;
++    --sidebar-border: 240 4% 16%;
++    --sidebar-ring: 243 75% 59%;
+   }
+ }
+ 
+@@ -89,6 +85,15 @@ body {
+     @apply border-border;
+   }
+   body {
+-    @apply bg-background text-foreground;
++    @apply bg-background text-foreground antialiased;
++  }
++}
++
++@layer components {
++  .page-bg {
++    @apply min-h-screen bg-gradient-to-b from-indigo-50/80 via-white to-white;
++  }
++  .hero-gradient {
++    background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.15), transparent);
+   }
+ }
+diff --git a/app/layout.tsx b/app/layout.tsx
+index ab8cdf6..d355e7c 100644
+--- a/app/layout.tsx
++++ b/app/layout.tsx
+@@ -3,13 +3,14 @@ import type { Metadata } from "next"
+ import { Inter } from "next/font/google"
+ import "./globals.css"
+ import { Toaster } from "@/components/ui/toaster"
++import Navbar from "@/components/navbar"
++import Footer from "@/components/footer"
+ 
+ const inter = Inter({ subsets: ["latin"] })
+ 
+ export const metadata: Metadata = {
+-  title: "College Fest Token System",
+-  description: "Automated student registration and validation system with QR codes",
+-    generator: 'v0.dev'
++  title: "FestPass — College Fest Token System",
++  description: "Automated student registration and QR-based entry validation for college fests. Built with Next.js, MongoDB, and TypeScript.",
+ }
+ 
+ export default function RootLayout({
+@@ -20,7 +21,11 @@ export default function RootLayout({
+   return (
+     <html lang="en">
+       <body className={inter.className}>
+-        {children}
++        <div className="flex min-h-screen flex-col">
++          <Navbar />
++          <main className="flex-1">{children}</main>
++          <Footer />
++        </div>
+         <Toaster />
+       </body>
+     </html>
+diff --git a/app/page.tsx b/app/page.tsx
+index 31e7083..231f646 100644
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -1,108 +1,203 @@
+ import Link from "next/link"
+ import { Button } from "@/components/ui/button"
+ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+-import { Users, QrCode, Shield, BarChart3 } from "lucide-react"
++import { Users, QrCode, Shield, BarChart3, ArrowRight, Zap, Globe, Lock } from "lucide-react"
++
++const features = [
++  {
++    icon: Users,
++    title: "Register",
++    description: "Students sign up with their details and receive a unique fest token instantly.",
++    href: "/register",
++    cta: "Register Now",
++    color: "bg-indigo-100 text-indigo-700",
++    primary: true,
++  },
++  {
++    icon: QrCode,
++    title: "QR Codes",
++    description: "Each registrant gets a unique QR code for fast, contactless entry validation.",
++    href: "/students",
++    cta: "View Students",
++    color: "bg-emerald-100 text-emerald-700",
++  },
++  {
++    icon: Shield,
++    title: "Validate",
++    description: "Scan QR codes at the entrance or validate manually by student ID.",
++    href: "/validate",
++    cta: "Validate Entry",
++    color: "bg-violet-100 text-violet-700",
++  },
++  {
++    icon: BarChart3,
++    title: "Analytics",
++    description: "Real-time dashboard with role breakdowns, validation rates, and college stats.",
++    href: "/analytics",
++    cta: "View Analytics",
++    color: "bg-amber-100 text-amber-700",
++  },
++]
++
++const steps = [
++  {
++    step: "01",
++    title: "Register",
++    description: "Fill out a short form with your name, college, and role in the fest.",
++    color: "border-indigo-200 bg-indigo-50/50",
++    accent: "text-indigo-600",
++  },
++  {
++    step: "02",
++    title: "Get your QR Code",
++    description: "Receive a unique fest ID and downloadable QR code tied to your registration.",
++    color: "border-emerald-200 bg-emerald-50/50",
++    accent: "text-emerald-600",
++  },
++  {
++    step: "03",
++    title: "Walk in",
++    description: "Show your QR code at the gate — one scan and you're validated.",
++    color: "border-violet-200 bg-violet-50/50",
++    accent: "text-violet-600",
++  },
++]
++
++const highlights = [
++  { icon: Zap, label: "Instant registration with unique ID generation" },
++  { icon: Globe, label: "RESTful API with full CRUD operations" },
++  { icon: Lock, label: "Server-side validation and duplicate detection" },
++]
+ 
+ export default function HomePage() {
+   return (
+-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+-      <div className="container mx-auto px-4 py-8">
+-        <div className="text-center mb-12">
+-          <h1 className="text-4xl font-bold text-gray-900 mb-4">College Fest Token System</h1>
+-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+-            Automated student registration and validation system with unique QR codes for seamless fest management
++    <div className="page-bg">
++      {/* Hero */}
++      <section className="hero-gradient">
++        <div className="container mx-auto px-4 pt-20 pb-16 text-center">
++          <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-sm font-medium text-indigo-700 mb-6">
++            <QrCode className="h-3.5 w-3.5" />
++            Automated Token System
++          </div>
++
++          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 mb-5 text-balance max-w-3xl mx-auto">
++            Seamless entry management for your college fest
++          </h1>
++
++          <p className="text-lg text-gray-500 max-w-xl mx-auto mb-10 leading-relaxed">
++            Register students, generate QR tokens, and validate entries in real time — all from one dashboard built with the MERN stack.
+           </p>
+-        </div>
+ 
+-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+-          <Card className="hover:shadow-lg transition-shadow">
+-            <CardHeader className="text-center">
+-              <Users className="h-12 w-12 text-blue-600 mx-auto mb-2" />
+-              <CardTitle>Register</CardTitle>
+-              <CardDescription>Sign up for the fest and get your unique token</CardDescription>
+-            </CardHeader>
+-            <CardContent>
+-              <Link href="/register">
+-                <Button className="w-full">Register Now</Button>
+-              </Link>
+-            </CardContent>
+-          </Card>
++          <div className="flex flex-wrap items-center justify-center gap-3">
++            <Link href="/register">
++              <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 px-6 shadow-md shadow-indigo-200">
++                Register for the Fest
++                <ArrowRight className="h-4 w-4" />
++              </Button>
++            </Link>
++            <Link href="/analytics">
++              <Button size="lg" variant="outline" className="gap-2 px-6">
++                <BarChart3 className="h-4 w-4" />
++                View Dashboard
++              </Button>
++            </Link>
++          </div>
+ 
+-          <Card className="hover:shadow-lg transition-shadow">
+-            <CardHeader className="text-center">
+-              <QrCode className="h-12 w-12 text-green-600 mx-auto mb-2" />
+-              <CardTitle>QR Codes</CardTitle>
+-              <CardDescription>View and download your QR code for entry</CardDescription>
+-            </CardHeader>
+-            <CardContent>
+-              <Link href="/students">
+-                <Button variant="outline" className="w-full bg-transparent">
+-                  View Students
+-                </Button>
+-              </Link>
+-            </CardContent>
+-          </Card>
++          {/* Highlights */}
++          <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 mt-12 text-sm text-gray-500">
++            {highlights.map((h) => (
++              <span key={h.label} className="inline-flex items-center gap-1.5">
++                <h.icon className="h-4 w-4 text-indigo-500" />
++                {h.label}
++              </span>
++            ))}
++          </div>
++        </div>
++      </section>
+ 
+-          <Card className="hover:shadow-lg transition-shadow">
+-            <CardHeader className="text-center">
+-              <Shield className="h-12 w-12 text-purple-600 mx-auto mb-2" />
+-              <CardTitle>Validate</CardTitle>
+-              <CardDescription>Scan QR codes to validate student entries</CardDescription>
+-            </CardHeader>
+-            <CardContent>
+-              <Link href="/validate">
+-                <Button variant="outline" className="w-full bg-transparent">
+-                  Validate Entry
+-                </Button>
+-              </Link>
+-            </CardContent>
+-          </Card>
++      {/* Feature Cards */}
++      <section className="container mx-auto px-4 py-16">
++        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
++          {features.map((feature) => (
++            <Card key={feature.title} className="group relative overflow-hidden border hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
++              <CardHeader className="pb-3">
++                <div className={`inline-flex h-11 w-11 items-center justify-center rounded-xl ${feature.color} mb-3`}>
++                  <feature.icon className="h-5 w-5" />
++                </div>
++                <CardTitle className="text-base">{feature.title}</CardTitle>
++                <CardDescription className="text-sm leading-relaxed">
++                  {feature.description}
++                </CardDescription>
++              </CardHeader>
++              <CardContent>
++                <Link href={feature.href}>
++                  <Button
++                    variant={feature.primary ? "default" : "outline"}
++                    className={`w-full ${feature.primary ? "bg-indigo-600 hover:bg-indigo-700 text-white" : "bg-transparent"}`}
++                    size="sm"
++                  >
++                    {feature.cta}
++                    <ArrowRight className="h-3.5 w-3.5 ml-1.5 transition-transform group-hover:translate-x-0.5" />
++                  </Button>
++                </Link>
++              </CardContent>
++            </Card>
++          ))}
++        </div>
++      </section>
+ 
+-          <Card className="hover:shadow-lg transition-shadow">
+-            <CardHeader className="text-center">
+-              <BarChart3 className="h-12 w-12 text-orange-600 mx-auto mb-2" />
+-              <CardTitle>Analytics</CardTitle>
+-              <CardDescription>View registration and validation statistics</CardDescription>
+-            </CardHeader>
+-            <CardContent>
+-              <Link href="/analytics">
+-                <Button variant="outline" className="w-full bg-transparent">
+-                  View Analytics
+-                </Button>
+-              </Link>
+-            </CardContent>
+-          </Card>
++      {/* How It Works */}
++      <section className="container mx-auto px-4 py-16">
++        <div className="text-center mb-12">
++          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 mb-3">
++            How It Works
++          </h2>
++          <p className="text-gray-500 max-w-md mx-auto">
++            Three steps from registration to validated entry at the fest gate.
++          </p>
+         </div>
+ 
+-        <div className="bg-white rounded-lg shadow-lg p-8">
+-          <h2 className="text-2xl font-bold text-gray-900 mb-6">How It Works</h2>
+-          <div className="grid md:grid-cols-3 gap-8">
+-            <div className="text-center">
+-              <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+-                <span className="text-2xl font-bold text-blue-600">1</span>
+-              </div>
+-              <h3 className="text-lg font-semibold mb-2">Register</h3>
+-              <p className="text-gray-600">
+-                Fill out the registration form with your details and select your role in the fest
++        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
++          {steps.map((step) => (
++            <div
++              key={step.step}
++              className={`rounded-2xl border p-6 ${step.color} transition-shadow hover:shadow-md`}
++            >
++              <span className={`text-xs font-bold uppercase tracking-widest ${step.accent}`}>
++                Step {step.step}
++              </span>
++              <h3 className="text-lg font-semibold text-gray-900 mt-3 mb-2">
++                {step.title}
++              </h3>
++              <p className="text-sm text-gray-600 leading-relaxed">
++                {step.description}
+               </p>
+             </div>
+-            <div className="text-center">
+-              <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+-                <span className="text-2xl font-bold text-green-600">2</span>
+-              </div>
+-              <h3 className="text-lg font-semibold mb-2">Get QR Code</h3>
+-              <p className="text-gray-600">Receive a unique QR code containing your student ID and role information</p>
+-            </div>
+-            <div className="text-center">
+-              <div className="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+-                <span className="text-2xl font-bold text-purple-600">3</span>
+-              </div>
+-              <h3 className="text-lg font-semibold mb-2">Validate Entry</h3>
+-              <p className="text-gray-600">Show your QR code at the entrance for quick validation and entry</p>
+-            </div>
++          ))}
++        </div>
++      </section>
++
++      {/* Tech Stack banner */}
++      <section className="container mx-auto px-4 pb-20">
++        <div className="rounded-2xl border bg-gradient-to-br from-gray-900 to-gray-800 p-8 sm:p-12 text-center">
++          <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">Built with Modern Tech</h3>
++          <p className="text-gray-400 mb-8 max-w-md mx-auto text-sm leading-relaxed">
++            Full-stack TypeScript application with server-side validation, RESTful APIs, and real-time analytics.
++          </p>
++          <div className="flex flex-wrap justify-center gap-3">
++            {["Next.js 14", "React 18", "TypeScript", "MongoDB", "Tailwind CSS", "shadcn/ui", "REST API"].map(
++              (tech) => (
++                <span
++                  key={tech}
++                  className="rounded-full border border-gray-700 bg-gray-800 px-4 py-1.5 text-xs font-medium text-gray-300"
++                >
++                  {tech}
++                </span>
++              ),
++            )}
+           </div>
+         </div>
+-      </div>
++      </section>
+     </div>
+   )
+ }
+diff --git a/app/register/page.tsx b/app/register/page.tsx
+index c37f1b1..cfe609e 100644
+--- a/app/register/page.tsx
++++ b/app/register/page.tsx
+@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
+ import { Label } from "@/components/ui/label"
+ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+ import { useToast } from "@/hooks/use-toast"
+-import { ArrowLeft, CheckCircle } from "lucide-react"
++import { CheckCircle, Users } from "lucide-react"
+ import Link from "next/link"
+ 
+ interface Student {
+@@ -39,7 +39,6 @@ export default function RegisterPage() {
+     setIsSubmitting(true)
+ 
+     try {
+-      // Validate form
+       if (!formData.name || !formData.email || !formData.phone || !formData.college || !formData.role) {
+         toast({
+           title: "Error",
+@@ -49,12 +48,9 @@ export default function RegisterPage() {
+         return
+       }
+ 
+-      // Submit to API
+       const response = await fetch("/api/students", {
+         method: "POST",
+-        headers: {
+-          "Content-Type": "application/json",
+-        },
++        headers: { "Content-Type": "application/json" },
+         body: JSON.stringify(formData),
+       })
+ 
+@@ -71,14 +67,7 @@ export default function RegisterPage() {
+         description: `Your unique ID is: ${data.student.id}`,
+       })
+ 
+-      // Reset form
+-      setFormData({
+-        name: "",
+-        email: "",
+-        phone: "",
+-        college: "",
+-        role: "",
+-      })
++      setFormData({ name: "", email: "", phone: "", college: "", role: "" })
+     } catch (error: any) {
+       toast({
+         title: "Registration Failed",
+@@ -92,47 +81,44 @@ export default function RegisterPage() {
+ 
+   if (registeredStudent) {
+     return (
+-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+-        <div className="container mx-auto max-w-2xl">
+-          <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6">
+-            <ArrowLeft className="h-4 w-4 mr-2" />
+-            Back to Home
+-          </Link>
+-
+-          <Card className="text-center">
+-            <CardHeader>
+-              <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
+-              <CardTitle className="text-2xl text-green-600">Registration Successful!</CardTitle>
+-              <CardDescription>Your unique token has been generated</CardDescription>
++      <div className="page-bg">
++        <div className="container mx-auto max-w-lg px-4 py-16">
++          <Card className="text-center border-emerald-200 bg-emerald-50/30">
++            <CardHeader className="pb-4">
++              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 mb-4">
++                <CheckCircle className="h-8 w-8 text-emerald-600" />
++              </div>
++              <CardTitle className="text-2xl text-emerald-700">You&apos;re registered!</CardTitle>
++              <CardDescription>Save your unique token — you&apos;ll need it at the gate.</CardDescription>
+             </CardHeader>
+-            <CardContent className="space-y-4">
+-              <div className="bg-gray-50 p-4 rounded-lg">
+-                <p className="text-sm text-gray-600 mb-2">Your Unique ID:</p>
++            <CardContent className="space-y-5">
++              <div className="rounded-xl bg-white border border-emerald-200 p-5">
++                <p className="text-xs font-medium uppercase tracking-wider text-gray-400 mb-1">Your Fest ID</p>
+                 <p className="text-2xl font-mono font-bold text-gray-900">{registeredStudent.id}</p>
+               </div>
+ 
+-              <div className="grid grid-cols-2 gap-4 text-left">
++              <div className="grid grid-cols-2 gap-4 text-left text-sm">
+                 <div>
+-                  <p className="text-sm text-gray-600">Name:</p>
+-                  <p className="font-semibold">{registeredStudent.name}</p>
++                  <p className="text-gray-400 mb-0.5">Name</p>
++                  <p className="font-medium text-gray-900">{registeredStudent.name}</p>
+                 </div>
+                 <div>
+-                  <p className="text-sm text-gray-600">Role:</p>
+-                  <p className="font-semibold">{registeredStudent.role}</p>
++                  <p className="text-gray-400 mb-0.5">Role</p>
++                  <p className="font-medium text-gray-900 capitalize">{registeredStudent.role}</p>
+                 </div>
+                 <div>
+-                  <p className="text-sm text-gray-600">College:</p>
+-                  <p className="font-semibold">{registeredStudent.college}</p>
++                  <p className="text-gray-400 mb-0.5">College</p>
++                  <p className="font-medium text-gray-900">{registeredStudent.college}</p>
+                 </div>
+                 <div>
+-                  <p className="text-sm text-gray-600">Email:</p>
+-                  <p className="font-semibold">{registeredStudent.email}</p>
++                  <p className="text-gray-400 mb-0.5">Email</p>
++                  <p className="font-medium text-gray-900 break-all">{registeredStudent.email}</p>
+                 </div>
+               </div>
+ 
+-              <div className="flex gap-4 justify-center">
++              <div className="flex gap-3 justify-center pt-2">
+                 <Link href={`/students/${registeredStudent.id}`}>
+-                  <Button>View QR Code</Button>
++                  <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">View QR Code</Button>
+                 </Link>
+                 <Button variant="outline" onClick={() => setRegisteredStudent(null)}>
+                   Register Another
+@@ -146,71 +132,70 @@ export default function RegisterPage() {
+   }
+ 
+   return (
+-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+-      <div className="container mx-auto max-w-2xl">
+-        <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6">
+-          <ArrowLeft className="h-4 w-4 mr-2" />
+-          Back to Home
+-        </Link>
++    <div className="page-bg">
++      <div className="container mx-auto max-w-lg px-4 py-16">
++        <div className="text-center mb-8">
++          <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700 mb-4">
++            <Users className="h-6 w-6" />
++          </div>
++          <h1 className="text-2xl font-bold tracking-tight text-gray-900 mb-2">Student Registration</h1>
++          <p className="text-gray-500">Fill in your details to get your unique fest token and QR code.</p>
++        </div>
+ 
+         <Card>
+-          <CardHeader>
+-            <CardTitle>Student Registration</CardTitle>
+-            <CardDescription>Register for the college fest and get your unique token</CardDescription>
+-          </CardHeader>
+-          <CardContent>
+-            <form onSubmit={handleSubmit} className="space-y-4">
++          <CardContent className="pt-6">
++            <form onSubmit={handleSubmit} className="space-y-5">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+-                <div>
++                <div className="space-y-1.5">
+                   <Label htmlFor="name">Full Name</Label>
+                   <Input
+                     id="name"
+                     type="text"
+                     value={formData.name}
+                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+-                    placeholder="Enter your full name"
++                    placeholder="Your full name"
+                     required
+                   />
+                 </div>
+-                <div>
++                <div className="space-y-1.5">
+                   <Label htmlFor="email">Email</Label>
+                   <Input
+                     id="email"
+                     type="email"
+                     value={formData.email}
+                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+-                    placeholder="Enter your email"
++                    placeholder="you@college.edu"
+                     required
+                   />
+                 </div>
+               </div>
+ 
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+-                <div>
++                <div className="space-y-1.5">
+                   <Label htmlFor="phone">Phone Number</Label>
+                   <Input
+                     id="phone"
+                     type="tel"
+                     value={formData.phone}
+                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+-                    placeholder="Enter your phone number"
++                    placeholder="+91 98765 43210"
+                     required
+                   />
+                 </div>
+-                <div>
++                <div className="space-y-1.5">
+                   <Label htmlFor="college">College Name</Label>
+                   <Input
+                     id="college"
+                     type="text"
+                     value={formData.college}
+                     onChange={(e) => setFormData({ ...formData, college: e.target.value })}
+-                    placeholder="Enter your college name"
++                    placeholder="Your college"
+                     required
+                   />
+                 </div>
+               </div>
+ 
+-              <div>
++              <div className="space-y-1.5">
+                 <Label htmlFor="role">Role in Fest</Label>
+                 <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
+                   <SelectTrigger>
+@@ -226,7 +211,11 @@ export default function RegisterPage() {
+                 </Select>
+               </div>
+ 
+-              <Button type="submit" className="w-full" disabled={isSubmitting}>
++              <Button
++                type="submit"
++                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
++                disabled={isSubmitting}
++              >
+                 {isSubmitting ? "Registering..." : "Register"}
+               </Button>
+             </form>
+diff --git a/app/students/[id]/page.tsx b/app/students/[id]/page.tsx
+index 5a86e73..741a8cd 100644
+--- a/app/students/[id]/page.tsx
++++ b/app/students/[id]/page.tsx
+@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
+ import { Button } from "@/components/ui/button"
+ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+ import { Badge } from "@/components/ui/badge"
+-import { ArrowLeft, Download, Share2, CheckCircle, XCircle } from "lucide-react"
++import { Download, Share2, CheckCircle, XCircle, Users } from "lucide-react"
+ import Link from "next/link"
+ import { useToast } from "@/hooks/use-toast"
+ 
+@@ -19,6 +19,14 @@ interface Student {
+   validated: boolean
+ }
+ 
++const roleBadge: Record<string, string> = {
++  participant: "bg-indigo-50 text-indigo-700 border-indigo-200",
++  volunteer: "bg-emerald-50 text-emerald-700 border-emerald-200",
++  organizer: "bg-violet-50 text-violet-700 border-violet-200",
++  judge: "bg-amber-50 text-amber-700 border-amber-200",
++  sponsor: "bg-rose-50 text-rose-700 border-rose-200",
++}
++
+ export default function StudentDetailPage({ params }: { params: { id: string } }) {
+   const [student, setStudent] = useState<Student | null>(null)
+   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("")
+@@ -26,7 +34,6 @@ export default function StudentDetailPage({ params }: { params: { id: string } }
+   const { toast } = useToast()
+ 
+   useEffect(() => {
+-    // Load student data from API
+     fetchStudent()
+   }, [params.id])
+ 
+@@ -34,12 +41,8 @@ export default function StudentDetailPage({ params }: { params: { id: string } }
+     try {
+       const response = await fetch(`/api/students/${params.id}`)
+       const data = await response.json()
+-
+-      if (response.ok) {
+-        setStudent(data.student)
+-      } else {
+-        setStudent(null)
+-      }
++      if (response.ok) setStudent(data.student)
++      else setStudent(null)
+     } catch (error) {
+       console.error("Error fetching student:", error)
+       setStudent(null)
+@@ -47,42 +50,24 @@ export default function StudentDetailPage({ params }: { params: { id: string } }
+   }
+ 
+   useEffect(() => {
+-    if (student && canvasRef.current) {
+-      generateQRCode()
+-    }
++    if (student && canvasRef.current) generateQRCode()
+   }, [student])
+ 
+   const generateQRCode = () => {
+     if (!student || !canvasRef.current) return
+-
+     const canvas = canvasRef.current
+     const ctx = canvas.getContext("2d")
+     if (!ctx) return
+ 
+-    // Set canvas size
+     canvas.width = 300
+     canvas.height = 300
+-
+-    // Clear canvas
+     ctx.fillStyle = "white"
+     ctx.fillRect(0, 0, 300, 300)
+ 
+-    // Create QR code pattern (simplified version)
+-    const qrData = JSON.stringify({
+-      id: student.id,
+-      name: student.name,
+-      role: student.role,
+-      college: student.college,
+-    })
+-
+-    // Generate a simple pattern based on the data
+-    const hash = qrData.split("").reduce((a, b) => {
+-      a = (a << 5) - a + b.charCodeAt(0)
+-      return a & a
+-    }, 0)
++    const qrData = JSON.stringify({ id: student.id, name: student.name, role: student.role, college: student.college })
++    const hash = qrData.split("").reduce((a, b) => { a = (a << 5) - a + b.charCodeAt(0); return a & a }, 0)
+ 
+-    // Draw QR-like pattern
+-    ctx.fillStyle = "black"
++    ctx.fillStyle = "#312e81" // indigo-900
+     const cellSize = 10
+     const gridSize = 25
+ 
+@@ -95,95 +80,63 @@ export default function StudentDetailPage({ params }: { params: { id: string } }
+       }
+     }
+ 
+-    // Add corner markers
+     const drawCornerMarker = (x: number, y: number) => {
+-      ctx.fillStyle = "black"
++      ctx.fillStyle = "#312e81"
+       ctx.fillRect(x, y, 70, 70)
+       ctx.fillStyle = "white"
+       ctx.fillRect(x + 10, y + 10, 50, 50)
+-      ctx.fillStyle = "black"
++      ctx.fillStyle = "#312e81"
+       ctx.fillRect(x + 20, y + 20, 30, 30)
+     }
+ 
+-    drawCornerMarker(25, 25) // Top-left
+-    drawCornerMarker(205, 25) // Top-right
+-    drawCornerMarker(25, 205) // Bottom-left
++    drawCornerMarker(25, 25)
++    drawCornerMarker(205, 25)
++    drawCornerMarker(25, 205)
+ 
+-    // Convert to data URL
+     const dataUrl = canvas.toDataURL("image/png")
+     setQrCodeDataUrl(dataUrl)
+   }
+ 
+   const downloadQRCode = () => {
+     if (!qrCodeDataUrl || !student) return
+-
+     const link = document.createElement("a")
+     link.download = `${student.name}-QRCode.png`
+     link.href = qrCodeDataUrl
+     link.click()
+-
+-    toast({
+-      title: "QR Code Downloaded",
+-      description: "QR code has been saved to your device",
+-    })
++    toast({ title: "QR Code Downloaded", description: "Saved to your device" })
+   }
+ 
+   const shareQRCode = async () => {
+     if (!qrCodeDataUrl || !student) return
+-
+     try {
+-      // Convert data URL to blob
+       const response = await fetch(qrCodeDataUrl)
+       const blob = await response.blob()
+       const file = new File([blob], `${student.name}-QRCode.png`, { type: "image/png" })
+-
+       if (navigator.share && navigator.canShare({ files: [file] })) {
+         await navigator.share({
+-          title: `${student.name} - College Fest QR Code`,
++          title: `${student.name} — FestPass QR Code`,
+           text: `QR Code for ${student.name} (${student.id})`,
+           files: [file],
+         })
+       } else {
+-        // Fallback: copy to clipboard
+         await navigator.clipboard.writeText(`Student ID: ${student.id}\nName: ${student.name}\nRole: ${student.role}`)
+-        toast({
+-          title: "Copied to Clipboard",
+-          description: "Student details copied to clipboard",
+-        })
++        toast({ title: "Copied to clipboard", description: "Student details copied" })
+       }
+-    } catch (error) {
+-      toast({
+-        title: "Share Failed",
+-        description: "Unable to share QR code",
+-        variant: "destructive",
+-      })
+-    }
+-  }
+-
+-  const getRoleBadgeColor = (role: string) => {
+-    const colors = {
+-      participant: "bg-blue-100 text-blue-800",
+-      volunteer: "bg-green-100 text-green-800",
+-      organizer: "bg-purple-100 text-purple-800",
+-      judge: "bg-orange-100 text-orange-800",
+-      sponsor: "bg-red-100 text-red-800",
++    } catch {
++      toast({ title: "Share failed", description: "Unable to share QR code", variant: "destructive" })
+     }
+-    return colors[role as keyof typeof colors] || "bg-gray-100 text-gray-800"
+   }
+ 
+   if (!student) {
+     return (
+-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+-        <div className="container mx-auto max-w-2xl">
+-          <Link href="/students" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6">
+-            <ArrowLeft className="h-4 w-4 mr-2" />
+-            Back to Students
+-          </Link>
+-          <Card className="text-center py-12">
++      <div className="page-bg">
++        <div className="container mx-auto max-w-lg px-4 py-16">
++          <Card className="text-center py-16">
+             <CardContent>
+-              <p className="text-gray-500 text-lg">Student not found</p>
++              <Users className="h-10 w-10 text-gray-300 mx-auto mb-3" />
++              <p className="text-gray-500 mb-4">Student not found</p>
+               <Link href="/students">
+-                <Button className="mt-4">Back to Students</Button>
++                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">Back to Students</Button>
+               </Link>
+             </CardContent>
+           </Card>
+@@ -193,59 +146,45 @@ export default function StudentDetailPage({ params }: { params: { id: string } }
+   }
+ 
+   return (
+-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+-      <div className="container mx-auto max-w-4xl">
+-        <Link href="/students" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6">
+-          <ArrowLeft className="h-4 w-4 mr-2" />
+-          Back to Students
+-        </Link>
+-
+-        <div className="grid md:grid-cols-2 gap-8">
+-          {/* Student Details */}
++    <div className="page-bg">
++      <div className="container mx-auto max-w-4xl px-4 py-12">
++        <div className="grid md:grid-cols-2 gap-6">
++          {/* Student Info */}
+           <Card>
+             <CardHeader>
+-              <div className="flex items-start justify-between">
+-                <div>
+-                  <CardTitle className="text-2xl">{student.name}</CardTitle>
+-                  <CardDescription className="font-mono text-lg mt-1">{student.id}</CardDescription>
++              <div className="flex items-start justify-between gap-3">
++                <div className="min-w-0">
++                  <CardTitle className="text-xl">{student.name}</CardTitle>
++                  <CardDescription className="font-mono text-sm mt-1">{student.id}</CardDescription>
+                 </div>
+                 {student.validated ? (
+-                  <div className="flex items-center text-green-600">
+-                    <CheckCircle className="h-6 w-6 mr-2" />
+-                    <span className="font-semibold">Validated</span>
+-                  </div>
++                  <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1 shrink-0">
++                    <CheckCircle className="h-3.5 w-3.5" /> Validated
++                  </span>
+                 ) : (
+-                  <div className="flex items-center text-gray-500">
+-                    <XCircle className="h-6 w-6 mr-2" />
+-                    <span className="font-semibold">Pending</span>
+-                  </div>
++                  <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-100 border border-gray-200 rounded-full px-2.5 py-1 shrink-0">
++                    <XCircle className="h-3.5 w-3.5" /> Pending
++                  </span>
+                 )}
+               </div>
+             </CardHeader>
+-            <CardContent className="space-y-4">
+-              <div>
+-                <Badge className={getRoleBadgeColor(student.role)} variant="secondary">
+-                  {student.role.charAt(0).toUpperCase() + student.role.slice(1)}
+-                </Badge>
+-              </div>
+-
+-              <div className="space-y-3">
+-                <div>
+-                  <p className="text-sm font-medium text-gray-600">College</p>
+-                  <p className="text-lg">{student.college}</p>
+-                </div>
+-                <div>
+-                  <p className="text-sm font-medium text-gray-600">Email</p>
+-                  <p className="text-lg">{student.email}</p>
+-                </div>
+-                <div>
+-                  <p className="text-sm font-medium text-gray-600">Phone</p>
+-                  <p className="text-lg">{student.phone}</p>
+-                </div>
+-                <div>
+-                  <p className="text-sm font-medium text-gray-600">Registration Date</p>
+-                  <p className="text-lg">{new Date(student.registeredAt).toLocaleDateString()}</p>
+-                </div>
++            <CardContent className="space-y-5">
++              <Badge variant="outline" className={roleBadge[student.role] || ""}>
++                {student.role.charAt(0).toUpperCase() + student.role.slice(1)}
++              </Badge>
++
++              <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
++                {[
++                  { label: "College", value: student.college },
++                  { label: "Email", value: student.email },
++                  { label: "Phone", value: student.phone },
++                  { label: "Registered", value: new Date(student.registeredAt).toLocaleDateString() },
++                ].map((field) => (
++                  <div key={field.label}>
++                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-0.5">{field.label}</p>
++                    <p className="text-gray-900 break-all">{field.value}</p>
++                  </div>
++                ))}
+               </div>
+             </CardContent>
+           </Card>
+@@ -253,35 +192,29 @@ export default function StudentDetailPage({ params }: { params: { id: string } }
+           {/* QR Code */}
+           <Card>
+             <CardHeader>
+-              <CardTitle>QR Code</CardTitle>
+-              <CardDescription>Scan this code for entry validation</CardDescription>
++              <CardTitle className="text-lg">QR Code</CardTitle>
++              <CardDescription>Show this at the fest gate for validation</CardDescription>
+             </CardHeader>
+-            <CardContent className="text-center space-y-4">
+-              <div className="bg-white p-4 rounded-lg inline-block shadow-sm">
+-                <canvas
+-                  ref={canvasRef}
+-                  className="border border-gray-200 rounded"
+-                  style={{ maxWidth: "100%", height: "auto" }}
+-                />
++            <CardContent className="text-center space-y-5">
++              <div className="inline-block rounded-xl border bg-white p-4 shadow-sm">
++                <canvas ref={canvasRef} className="rounded" style={{ maxWidth: "100%", height: "auto" }} />
+               </div>
+ 
+-              <div className="flex gap-2 justify-center">
+-                <Button onClick={downloadQRCode} variant="outline">
+-                  <Download className="h-4 w-4 mr-2" />
+-                  Download
++              <div className="flex gap-2.5 justify-center">
++                <Button variant="outline" onClick={downloadQRCode} size="sm">
++                  <Download className="h-4 w-4 mr-1.5" /> Download
+                 </Button>
+-                <Button onClick={shareQRCode} variant="outline">
+-                  <Share2 className="h-4 w-4 mr-2" />
+-                  Share
++                <Button variant="outline" onClick={shareQRCode} size="sm">
++                  <Share2 className="h-4 w-4 mr-1.5" /> Share
+                 </Button>
+               </div>
+ 
+-              <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+-                <p className="font-medium mb-1">QR Code Contains:</p>
+-                <p>• Student ID: {student.id}</p>
+-                <p>• Name: {student.name}</p>
+-                <p>• Role: {student.role}</p>
+-                <p>• College: {student.college}</p>
++              <div className="text-xs text-gray-500 bg-gray-50 rounded-lg p-3 text-left space-y-0.5">
++                <p className="font-medium text-gray-600 mb-1">QR Code contains:</p>
++                <p>Student ID: {student.id}</p>
++                <p>Name: {student.name}</p>
++                <p>Role: {student.role}</p>
++                <p>College: {student.college}</p>
+               </div>
+             </CardContent>
+           </Card>
+diff --git a/app/students/page.tsx b/app/students/page.tsx
+index 6026168..6444639 100644
+--- a/app/students/page.tsx
++++ b/app/students/page.tsx
+@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
+ import { Input } from "@/components/ui/input"
+ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+ import { Badge } from "@/components/ui/badge"
+-import { ArrowLeft, Search, QrCode, CheckCircle, XCircle } from "lucide-react"
++import { Search, QrCode, CheckCircle, XCircle, Users } from "lucide-react"
+ import Link from "next/link"
+ 
+ interface Student {
+@@ -20,6 +20,14 @@ interface Student {
+   validated: boolean
+ }
+ 
++const roleBadge: Record<string, string> = {
++  participant: "bg-indigo-50 text-indigo-700 border-indigo-200",
++  volunteer: "bg-emerald-50 text-emerald-700 border-emerald-200",
++  organizer: "bg-violet-50 text-violet-700 border-violet-200",
++  judge: "bg-amber-50 text-amber-700 border-amber-200",
++  sponsor: "bg-rose-50 text-rose-700 border-rose-200",
++}
++
+ export default function StudentsPage() {
+   const [students, setStudents] = useState<Student[]>([])
+   const [filteredStudents, setFilteredStudents] = useState<Student[]>([])
+@@ -27,12 +35,10 @@ export default function StudentsPage() {
+   const [roleFilter, setRoleFilter] = useState("all")
+ 
+   useEffect(() => {
+-    // Load students from API
+     fetchStudents()
+   }, [])
+ 
+   useEffect(() => {
+-    // Filter students based on search term and role
+     fetchStudents()
+   }, [searchTerm, roleFilter])
+ 
+@@ -54,135 +60,93 @@ export default function StudentsPage() {
+     }
+   }
+ 
+-  const getRoleBadgeColor = (role: string) => {
+-    const colors = {
+-      participant: "bg-blue-100 text-blue-800",
+-      volunteer: "bg-green-100 text-green-800",
+-      organizer: "bg-purple-100 text-purple-800",
+-      judge: "bg-orange-100 text-orange-800",
+-      sponsor: "bg-red-100 text-red-800",
+-    }
+-    return colors[role as keyof typeof colors] || "bg-gray-100 text-gray-800"
+-  }
+-
+   return (
+-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+-      <div className="container mx-auto max-w-6xl">
+-        <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6">
+-          <ArrowLeft className="h-4 w-4 mr-2" />
+-          Back to Home
+-        </Link>
+-
++    <div className="page-bg">
++      <div className="container mx-auto max-w-6xl px-4 py-12">
+         <div className="mb-8">
+-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Registered Students</h1>
+-          <p className="text-gray-600">View all registered students and their QR codes</p>
++          <h1 className="text-2xl font-bold tracking-tight text-gray-900 mb-1">Registered Students</h1>
++          <p className="text-gray-500">View all registered students and their QR codes</p>
+         </div>
+ 
+         {/* Filters */}
+-        <Card className="mb-6">
+-          <CardContent className="pt-6">
+-            <div className="flex flex-col md:flex-row gap-4">
+-              <div className="flex-1">
+-                <div className="relative">
+-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+-                  <Input
+-                    placeholder="Search by name, ID, or college..."
+-                    value={searchTerm}
+-                    onChange={(e) => setSearchTerm(e.target.value)}
+-                    className="pl-10"
+-                  />
+-                </div>
+-              </div>
+-              <div className="w-full md:w-48">
+-                <Select value={roleFilter} onValueChange={setRoleFilter}>
+-                  <SelectTrigger>
+-                    <SelectValue placeholder="Filter by role" />
+-                  </SelectTrigger>
+-                  <SelectContent>
+-                    <SelectItem value="all">All Roles</SelectItem>
+-                    <SelectItem value="participant">Participant</SelectItem>
+-                    <SelectItem value="volunteer">Volunteer</SelectItem>
+-                    <SelectItem value="organizer">Organizer</SelectItem>
+-                    <SelectItem value="judge">Judge</SelectItem>
+-                    <SelectItem value="sponsor">Sponsor</SelectItem>
+-                  </SelectContent>
+-                </Select>
+-              </div>
+-            </div>
+-          </CardContent>
+-        </Card>
+-
+-        {/* Statistics */}
+-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+-          <Card>
+-            <CardContent className="pt-6">
+-              <div className="text-2xl font-bold text-blue-600">{students.length}</div>
+-              <p className="text-sm text-gray-600">Total Students</p>
+-            </CardContent>
+-          </Card>
+-          <Card>
+-            <CardContent className="pt-6">
+-              <div className="text-2xl font-bold text-green-600">{students.filter((s) => s.validated).length}</div>
+-              <p className="text-sm text-gray-600">Validated</p>
+-            </CardContent>
+-          </Card>
+-          <Card>
+-            <CardContent className="pt-6">
+-              <div className="text-2xl font-bold text-orange-600">{students.filter((s) => !s.validated).length}</div>
+-              <p className="text-sm text-gray-600">Pending</p>
+-            </CardContent>
+-          </Card>
+-          <Card>
+-            <CardContent className="pt-6">
+-              <div className="text-2xl font-bold text-purple-600">{new Set(students.map((s) => s.role)).size}</div>
+-              <p className="text-sm text-gray-600">Unique Roles</p>
+-            </CardContent>
+-          </Card>
++        <div className="flex flex-col md:flex-row gap-3 mb-6">
++          <div className="flex-1 relative">
++            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
++            <Input
++              placeholder="Search by name, ID, or college..."
++              value={searchTerm}
++              onChange={(e) => setSearchTerm(e.target.value)}
++              className="pl-10"
++            />
++          </div>
++          <div className="w-full md:w-48">
++            <Select value={roleFilter} onValueChange={setRoleFilter}>
++              <SelectTrigger>
++                <SelectValue placeholder="Filter by role" />
++              </SelectTrigger>
++              <SelectContent>
++                <SelectItem value="all">All Roles</SelectItem>
++                <SelectItem value="participant">Participant</SelectItem>
++                <SelectItem value="volunteer">Volunteer</SelectItem>
++                <SelectItem value="organizer">Organizer</SelectItem>
++                <SelectItem value="judge">Judge</SelectItem>
++                <SelectItem value="sponsor">Sponsor</SelectItem>
++              </SelectContent>
++            </Select>
++          </div>
+         </div>
+ 
+-        {/* Students List */}
+-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
++        {/* Quick Stats */}
++        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
++          {[
++            { label: "Total", value: students.length, color: "text-indigo-600" },
++            { label: "Validated", value: students.filter((s) => s.validated).length, color: "text-emerald-600" },
++            { label: "Pending", value: students.filter((s) => !s.validated).length, color: "text-amber-600" },
++            { label: "Roles", value: new Set(students.map((s) => s.role)).size, color: "text-violet-600" },
++          ].map((stat) => (
++            <Card key={stat.label}>
++              <CardContent className="pt-5 pb-4">
++                <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
++                <p className="text-xs text-gray-500 mt-0.5">{stat.label}</p>
++              </CardContent>
++            </Card>
++          ))}
++        </div>
++
++        {/* Students Grid */}
++        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+           {filteredStudents.map((student) => (
+-            <Card key={student.id} className="hover:shadow-lg transition-shadow">
+-              <CardHeader className="pb-3">
++            <Card key={student.id} className="group hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
++              <CardHeader className="pb-2">
+                 <div className="flex items-start justify-between">
+-                  <div>
+-                    <CardTitle className="text-lg">{student.name}</CardTitle>
+-                    <CardDescription className="font-mono text-sm">{student.id}</CardDescription>
++                  <div className="min-w-0">
++                    <CardTitle className="text-base truncate">{student.name}</CardTitle>
++                    <CardDescription className="font-mono text-xs mt-0.5">{student.id}</CardDescription>
+                   </div>
+                   {student.validated ? (
+-                    <CheckCircle className="h-5 w-5 text-green-600" />
++                    <CheckCircle className="h-5 w-5 text-emerald-500 shrink-0" />
+                   ) : (
+-                    <XCircle className="h-5 w-5 text-gray-400" />
++                    <XCircle className="h-5 w-5 text-gray-300 shrink-0" />
+                   )}
+                 </div>
+               </CardHeader>
+               <CardContent className="space-y-3">
+-                <div>
+-                  <Badge className={getRoleBadgeColor(student.role)}>
+-                    {student.role.charAt(0).toUpperCase() + student.role.slice(1)}
+-                  </Badge>
+-                </div>
+-
+-                <div className="space-y-1 text-sm">
+-                  <p>
+-                    <span className="text-gray-600">College:</span> {student.college}
+-                  </p>
+-                  <p>
+-                    <span className="text-gray-600">Email:</span> {student.email}
+-                  </p>
+-                  <p>
+-                    <span className="text-gray-600">Phone:</span> {student.phone}
+-                  </p>
+-                  <p>
+-                    <span className="text-gray-600">Registered:</span>{" "}
+-                    {new Date(student.registeredAt).toLocaleDateString()}
+-                  </p>
++                <Badge variant="outline" className={roleBadge[student.role] || "bg-gray-50 text-gray-700"}>
++                  {student.role.charAt(0).toUpperCase() + student.role.slice(1)}
++                </Badge>
++
++                <div className="space-y-1 text-sm text-gray-600">
++                  <p className="truncate">{student.college}</p>
++                  <p className="truncate">{student.email}</p>
++                  <p>{new Date(student.registeredAt).toLocaleDateString()}</p>
+                 </div>
+ 
+                 <Link href={`/students/${student.id}`}>
+-                  <Button className="w-full" size="sm">
+-                    <QrCode className="h-4 w-4 mr-2" />
++                  <Button
++                    size="sm"
++                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white mt-1"
++                  >
++                    <QrCode className="h-3.5 w-3.5 mr-1.5" />
+                     View QR Code
+                   </Button>
+                 </Link>
+@@ -192,11 +156,14 @@ export default function StudentsPage() {
+         </div>
+ 
+         {filteredStudents.length === 0 && (
+-          <Card className="text-center py-12">
++          <Card className="text-center py-16">
+             <CardContent>
+-              <p className="text-gray-500 text-lg">No students found matching your criteria</p>
++              <Users className="h-10 w-10 text-gray-300 mx-auto mb-3" />
++              <p className="text-gray-500 mb-4">No students found matching your criteria</p>
+               <Link href="/register">
+-                <Button className="mt-4">Register New Student</Button>
++                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
++                  Register New Student
++                </Button>
+               </Link>
+             </CardContent>
+           </Card>
+diff --git a/app/validate/page.tsx b/app/validate/page.tsx
+index 5e6dfbf..0572f56 100644
+--- a/app/validate/page.tsx
++++ b/app/validate/page.tsx
+@@ -1,15 +1,13 @@
+ "use client"
+ 
+ import type React from "react"
+-
+ import { useState, useEffect, useRef } from "react"
+ import { Button } from "@/components/ui/button"
+ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+ import { Input } from "@/components/ui/input"
+ import { Label } from "@/components/ui/label"
+ import { Badge } from "@/components/ui/badge"
+-import { ArrowLeft, Camera, CameraOff, CheckCircle, XCircle, Search } from "lucide-react"
+-import Link from "next/link"
++import { Camera, CameraOff, CheckCircle, XCircle, Search, Shield } from "lucide-react"
+ import { useToast } from "@/hooks/use-toast"
+ 
+ interface Student {
+@@ -29,6 +27,14 @@ interface ValidationResult {
+   message: string
+ }
+ 
++const roleBadge: Record<string, string> = {
++  participant: "bg-indigo-50 text-indigo-700 border-indigo-200",
++  volunteer: "bg-emerald-50 text-emerald-700 border-emerald-200",
++  organizer: "bg-violet-50 text-violet-700 border-violet-200",
++  judge: "bg-amber-50 text-amber-700 border-amber-200",
++  sponsor: "bg-rose-50 text-rose-700 border-rose-200",
++}
++
+ export default function ValidatePage() {
+   const [students, setStudents] = useState<Student[]>([])
+   const [manualId, setManualId] = useState("")
+@@ -39,7 +45,6 @@ export default function ValidatePage() {
+   const { toast } = useToast()
+ 
+   useEffect(() => {
+-    // Load students and recent scans from API
+     fetchStudents()
+     fetchRecentScans()
+   }, [])
+@@ -48,9 +53,7 @@ export default function ValidatePage() {
+     try {
+       const response = await fetch("/api/students")
+       const data = await response.json()
+-      if (response.ok) {
+-        setStudents(data.students)
+-      }
++      if (response.ok) setStudents(data.students)
+     } catch (error) {
+       console.error("Error fetching students:", error)
+     }
+@@ -60,9 +63,7 @@ export default function ValidatePage() {
+     try {
+       const response = await fetch("/api/validate/recent")
+       const data = await response.json()
+-      if (response.ok) {
+-        setRecentScans(data.recentScans.map((scan: any) => scan.student))
+-      }
++      if (response.ok) setRecentScans(data.recentScans.map((scan: any) => scan.student))
+     } catch (error) {
+       console.error("Error fetching recent scans:", error)
+     }
+@@ -72,80 +73,51 @@ export default function ValidatePage() {
+     try {
+       const response = await fetch("/api/validate", {
+         method: "POST",
+-        headers: {
+-          "Content-Type": "application/json",
+-        },
++        headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({ studentId, method: "manual" }),
+       })
+-
+       const data = await response.json()
+-
+       if (response.ok) {
+-        // Refresh students and recent scans
+         fetchStudents()
+         fetchRecentScans()
+-        return data
+-      } else {
+-        return data
+-      }
+-    } catch (error) {
+-      return {
+-        success: false,
+-        message: "Network error occurred",
+       }
++      return data
++    } catch {
++      return { success: false, message: "Network error occurred" }
+     }
+   }
+ 
+   const handleManualValidation = (e: React.FormEvent) => {
+     e.preventDefault()
+     if (!manualId.trim()) {
+-      toast({
+-        title: "Error",
+-        description: "Please enter a student ID",
+-        variant: "destructive",
+-      })
++      toast({ title: "Error", description: "Please enter a student ID", variant: "destructive" })
+       return
+     }
+-
+-    validateStudent(manualId.trim()).then((result) => {
+-      setValidationResult(result as any)
+-
+-      if (result && result.success) {
+-        toast({
+-          title: "Validation Successful",
+-          description: `${(result as any).student?.name} has been validated`,
+-        })
++    validateStudent(manualId.trim()).then((result: any) => {
++      setValidationResult(result)
++      if (result?.success) {
++        toast({ title: "Validated", description: `${result.student?.name} is checked in` })
+         setManualId("")
+       } else {
+-        toast({
+-          title: "Validation Failed",
+-          description: (result as any).message,
+-          variant: "destructive",
+-        })
++        toast({ title: "Failed", description: result.message, variant: "destructive" })
+       }
+     })
+   }
+ 
+   const startCamera = async () => {
+     try {
+-      const stream = await navigator.mediaDevices.getUserMedia({
+-        video: { facingMode: "environment" },
+-      })
++      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+       if (videoRef.current) {
+         videoRef.current.srcObject = stream
+         setIsScanning(true)
+       }
+-    } catch (error) {
+-      toast({
+-        title: "Camera Error",
+-        description: "Unable to access camera. Please use manual entry.",
+-        variant: "destructive",
+-      })
++    } catch {
++      toast({ title: "Camera Error", description: "Unable to access camera. Use manual entry.", variant: "destructive" })
+     }
+   }
+ 
+   const stopCamera = () => {
+-    if (videoRef.current && videoRef.current.srcObject) {
++    if (videoRef.current?.srcObject) {
+       const stream = videoRef.current.srcObject as MediaStream
+       stream.getTracks().forEach((track) => track.stop())
+       videoRef.current.srcObject = null
+@@ -154,85 +126,60 @@ export default function ValidatePage() {
+   }
+ 
+   const simulateQRScan = () => {
+-    // Simulate scanning a random student's QR code
+-    const unvalidatedStudents = students.filter((s) => !s.validated)
+-    if (unvalidatedStudents.length === 0) {
+-      toast({
+-        title: "No Students to Validate",
+-        description: "All students have already been validated",
+-        variant: "destructive",
+-      })
++    const unvalidated = students.filter((s) => !s.validated)
++    if (unvalidated.length === 0) {
++      toast({ title: "All done", description: "Every student is already validated", variant: "destructive" })
+       return
+     }
+-
+-    const randomStudent = unvalidatedStudents[Math.floor(Math.random() * unvalidatedStudents.length)]
+-    validateStudent(randomStudent.id).then((result) => {
+-      setValidationResult(result as any)
+-
+-      toast({
+-        title: "QR Code Scanned",
+-        description: `Validated ${(result as any).student?.name}`,
+-      })
++    const random = unvalidated[Math.floor(Math.random() * unvalidated.length)]
++    validateStudent(random.id).then((result: any) => {
++      setValidationResult(result)
++      toast({ title: "QR Scanned", description: `Validated ${result.student?.name}` })
+     })
+   }
+ 
+-  const getRoleBadgeColor = (role: string) => {
+-    const colors = {
+-      participant: "bg-blue-100 text-blue-800",
+-      volunteer: "bg-green-100 text-green-800",
+-      organizer: "bg-purple-100 text-purple-800",
+-      judge: "bg-orange-100 text-orange-800",
+-      sponsor: "bg-red-100 text-red-800",
+-    }
+-    return colors[role as keyof typeof colors] || "bg-gray-100 text-gray-800"
+-  }
+-
+   return (
+-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+-      <div className="container mx-auto max-w-6xl">
+-        <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6">
+-          <ArrowLeft className="h-4 w-4 mr-2" />
+-          Back to Home
+-        </Link>
+-
++    <div className="page-bg">
++      <div className="container mx-auto max-w-6xl px-4 py-12">
+         <div className="mb-8">
+-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Entry Validation</h1>
+-          <p className="text-gray-600">Scan QR codes or manually enter student IDs to validate entries</p>
++          <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 text-violet-700 mb-4">
++            <Shield className="h-6 w-6" />
++          </div>
++          <h1 className="text-2xl font-bold tracking-tight text-gray-900 mb-1">Entry Validation</h1>
++          <p className="text-gray-500">Scan QR codes or enter student IDs to validate entries at the gate.</p>
+         </div>
+ 
+-        <div className="grid lg:grid-cols-2 gap-8">
+-          {/* Validation Methods */}
+-          <div className="space-y-6">
++        <div className="grid lg:grid-cols-2 gap-6">
++          {/* Left: Methods */}
++          <div className="space-y-5">
+             {/* QR Scanner */}
+             <Card>
+-              <CardHeader>
+-                <CardTitle>QR Code Scanner</CardTitle>
+-                <CardDescription>Use camera to scan student QR codes</CardDescription>
++              <CardHeader className="pb-3">
++                <CardTitle className="text-base">QR Code Scanner</CardTitle>
++                <CardDescription>Point your camera at a student QR code</CardDescription>
+               </CardHeader>
+               <CardContent className="space-y-4">
+                 {!isScanning ? (
+                   <div className="text-center">
+-                    <div className="bg-gray-100 rounded-lg p-8 mb-4">
+-                      <Camera className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+-                      <p className="text-gray-600">Camera not active</p>
++                    <div className="rounded-xl bg-gray-100 p-10 mb-4">
++                      <Camera className="h-12 w-12 text-gray-300 mx-auto" />
++                      <p className="text-sm text-gray-400 mt-2">Camera off</p>
+                     </div>
+-                    <Button onClick={startCamera} className="w-full">
+-                      <Camera className="h-4 w-4 mr-2" />
+-                      Start Camera
++                    <Button onClick={startCamera} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white">
++                      <Camera className="h-4 w-4 mr-1.5" /> Start Camera
+                     </Button>
+                   </div>
+                 ) : (
+                   <div className="text-center">
+-                    <div className="bg-black rounded-lg p-4 mb-4">
+-                      <video ref={videoRef} autoPlay playsInline className="w-full h-48 object-cover rounded" />
++                    <div className="rounded-xl bg-black p-3 mb-4">
++                      <video ref={videoRef} autoPlay playsInline className="w-full h-48 object-cover rounded-lg" />
+                     </div>
+                     <div className="flex gap-2">
+-                      <Button onClick={simulateQRScan} className="flex-1">
++                      <Button onClick={simulateQRScan} className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white">
+                         Simulate Scan
+                       </Button>
+                       <Button onClick={stopCamera} variant="outline">
+-                        <CameraOff className="h-4 w-4 mr-2" />
+-                        Stop
++                        <CameraOff className="h-4 w-4 mr-1.5" /> Stop
+                       </Button>
+                     </div>
+                   </div>
+@@ -240,99 +187,86 @@ export default function ValidatePage() {
+               </CardContent>
+             </Card>
+ 
+-            {/* Manual Entry */}
++            {/* Manual */}
+             <Card>
+-              <CardHeader>
+-                <CardTitle>Manual Entry</CardTitle>
+-                <CardDescription>Enter student ID manually for validation</CardDescription>
++              <CardHeader className="pb-3">
++                <CardTitle className="text-base">Manual Entry</CardTitle>
++                <CardDescription>Enter a student ID to validate</CardDescription>
+               </CardHeader>
+               <CardContent>
+-                <form onSubmit={handleManualValidation} className="space-y-4">
+-                  <div>
++                <form onSubmit={handleManualValidation} className="space-y-3">
++                  <div className="space-y-1.5">
+                     <Label htmlFor="studentId">Student ID</Label>
+                     <Input
+                       id="studentId"
+                       type="text"
+                       value={manualId}
+                       onChange={(e) => setManualId(e.target.value)}
+-                      placeholder="Enter student ID (e.g., FEST-1234567890-123)"
++                      placeholder="e.g. FEST-1234567890-123"
+                       className="font-mono"
+                     />
+                   </div>
+-                  <Button type="submit" className="w-full">
+-                    <Search className="h-4 w-4 mr-2" />
+-                    Validate Student
++                  <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white">
++                    <Search className="h-4 w-4 mr-1.5" /> Validate
+                   </Button>
+                 </form>
+               </CardContent>
+             </Card>
+           </div>
+ 
+-          {/* Validation Result & Recent Scans */}
+-          <div className="space-y-6">
+-            {/* Validation Result */}
++          {/* Right: Result & Recent */}
++          <div className="space-y-5">
+             {validationResult && (
+-              <Card
+-                className={
+-                  (validationResult as any).success ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"
+-                }
+-              >
+-                <CardHeader>
+-                  <div className="flex items-center">
+-                    {(validationResult as any).success ? (
+-                      <CheckCircle className="h-6 w-6 text-green-600 mr-2" />
++              <Card className={validationResult.success ? "border-emerald-200 bg-emerald-50/40" : "border-red-200 bg-red-50/40"}>
++                <CardHeader className="pb-2">
++                  <div className="flex items-center gap-2">
++                    {validationResult.success ? (
++                      <CheckCircle className="h-5 w-5 text-emerald-600" />
+                     ) : (
+-                      <XCircle className="h-6 w-6 text-red-600 mr-2" />
++                      <XCircle className="h-5 w-5 text-red-500" />
+                     )}
+-                    <CardTitle className={(validationResult as any).success ? "text-green-800" : "text-red-800"}>
+-                      {(validationResult as any).success ? "Validation Successful" : "Validation Failed"}
++                    <CardTitle className={`text-base ${validationResult.success ? "text-emerald-800" : "text-red-800"}`}>
++                      {validationResult.success ? "Validated" : "Failed"}
+                     </CardTitle>
+                   </div>
+                 </CardHeader>
+                 <CardContent>
+-                  <p className={`mb-4 ${(validationResult as any).success ? "text-green-700" : "text-red-700"}`}>
+-                    {(validationResult as any).message}
++                  <p className={`text-sm mb-3 ${validationResult.success ? "text-emerald-700" : "text-red-700"}`}>
++                    {validationResult.message}
+                   </p>
+-
+-                  {(validationResult as any).student && (
+-                    <div className="bg-white p-4 rounded-lg space-y-2">
++                  {validationResult.student && (
++                    <div className="rounded-lg bg-white border p-3 space-y-1.5">
+                       <div className="flex items-center justify-between">
+-                        <h4 className="font-semibold text-lg">{(validationResult as any).student.name}</h4>
+-                        <Badge className={getRoleBadgeColor((validationResult as any).student.role)}>
+-                          {(validationResult as any).student.role.charAt(0).toUpperCase() +
+-                            (validationResult as any).student.role.slice(1)}
++                        <span className="font-medium text-sm">{validationResult.student.name}</span>
++                        <Badge variant="outline" className={roleBadge[validationResult.student.role] || ""}>
++                          {validationResult.student.role.charAt(0).toUpperCase() + validationResult.student.role.slice(1)}
+                         </Badge>
+                       </div>
+-                      <p className="text-sm text-gray-600 font-mono">{(validationResult as any).student.id}</p>
+-                      <p className="text-sm text-gray-600">{(validationResult as any).student.college}</p>
+-                      <p className="text-sm text-gray-600">{(validationResult as any).student.email}</p>
++                      <p className="text-xs text-gray-500 font-mono">{validationResult.student.id}</p>
++                      <p className="text-xs text-gray-500">{validationResult.student.college}</p>
+                     </div>
+                   )}
+                 </CardContent>
+               </Card>
+             )}
+ 
+-            {/* Recent Scans */}
+             <Card>
+-              <CardHeader>
+-                <CardTitle>Recent Validations</CardTitle>
+-                <CardDescription>Last 10 validated students</CardDescription>
++              <CardHeader className="pb-3">
++                <CardTitle className="text-base">Recent Validations</CardTitle>
++                <CardDescription>Last 10 check-ins</CardDescription>
+               </CardHeader>
+               <CardContent>
+                 {recentScans.length === 0 ? (
+-                  <p className="text-gray-500 text-center py-4">No recent validations</p>
++                  <p className="text-sm text-gray-400 text-center py-6">No validations yet</p>
+                 ) : (
+-                  <div className="space-y-3">
++                  <div className="space-y-2">
+                     {recentScans.map((student, index) => (
+-                      <div
+-                        key={`${student.id}-${index}`}
+-                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+-                      >
+-                        <div>
+-                          <p className="font-medium">{student.name}</p>
+-                          <p className="text-sm text-gray-600 font-mono">{student.id}</p>
++                      <div key={`${student.id}-${index}`} className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2.5">
++                        <div className="min-w-0">
++                          <p className="text-sm font-medium truncate">{student.name}</p>
++                          <p className="text-xs text-gray-400 font-mono">{student.id}</p>
+                         </div>
+-                        <Badge className={getRoleBadgeColor(student.role)} variant="secondary">
++                        <Badge variant="outline" className={`shrink-0 ml-2 ${roleBadge[student.role] || ""}`}>
+                           {student.role}
+                         </Badge>
+                       </div>
+diff --git a/components/footer.tsx b/components/footer.tsx
+new file mode 100644
+index 0000000..ed210fb
+--- /dev/null
++++ b/components/footer.tsx
+@@ -0,0 +1,69 @@
++import { QrCode } from "lucide-react"
++import Link from "next/link"
++
++export default function Footer() {
++  return (
++    <footer className="border-t bg-gray-50/50">
++      <div className="container mx-auto px-4 py-10">
++        <div className="flex flex-col md:flex-row items-start justify-between gap-8">
++          <div className="max-w-xs">
++            <Link href="/" className="flex items-center gap-2.5 mb-3">
++              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
++                <QrCode className="h-4 w-4" />
++              </div>
++              <span className="text-base font-semibold tracking-tight text-gray-900">
++                FestPass
++              </span>
++            </Link>
++            <p className="text-sm text-gray-500 leading-relaxed">
++              Automated token generation and QR-based entry validation for college fests. Built with Next.js, MongoDB, and TypeScript.
++            </p>
++          </div>
++
++          <div className="flex gap-16">
++            <div>
++              <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
++                System
++              </h4>
++              <nav className="flex flex-col gap-2">
++                <Link href="/register" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">
++                  Registration
++                </Link>
++                <Link href="/students" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">
++                  Students
++                </Link>
++                <Link href="/validate" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">
++                  Validation
++                </Link>
++                <Link href="/analytics" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">
++                  Analytics
++                </Link>
++              </nav>
++            </div>
++
++            <div>
++              <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
++                Stack
++              </h4>
++              <nav className="flex flex-col gap-2 text-sm text-gray-500">
++                <span>Next.js 14</span>
++                <span>MongoDB</span>
++                <span>TypeScript</span>
++                <span>Tailwind CSS</span>
++              </nav>
++            </div>
++          </div>
++        </div>
++
++        <div className="mt-10 border-t pt-6 flex flex-col md:flex-row items-center justify-between gap-2">
++          <p className="text-xs text-gray-400">
++            &copy; {new Date().getFullYear()} FestPass &middot; College Fest Token System
++          </p>
++          <p className="text-xs text-gray-400">
++            Built with Next.js, shadcn/ui &amp; MongoDB
++          </p>
++        </div>
++      </div>
++    </footer>
++  )
++}
+diff --git a/components/navbar.tsx b/components/navbar.tsx
+new file mode 100644
+index 0000000..3af9de0
+--- /dev/null
++++ b/components/navbar.tsx
+@@ -0,0 +1,92 @@
++"use client"
++
++import Link from "next/link"
++import { usePathname } from "next/navigation"
++import { QrCode, Users, Shield, BarChart3, Home, Menu, X } from "lucide-react"
++import { useState } from "react"
++import { Button } from "@/components/ui/button"
++
++const navLinks = [
++  { href: "/", label: "Home", icon: Home },
++  { href: "/register", label: "Register", icon: Users },
++  { href: "/students", label: "Students", icon: QrCode },
++  { href: "/validate", label: "Validate", icon: Shield },
++  { href: "/analytics", label: "Analytics", icon: BarChart3 },
++]
++
++export default function Navbar() {
++  const pathname = usePathname()
++  const [mobileOpen, setMobileOpen] = useState(false)
++
++  return (
++    <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-lg">
++      <div className="container mx-auto flex h-16 items-center justify-between px-4">
++        <Link href="/" className="flex items-center gap-2.5">
++          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white">
++            <QrCode className="h-5 w-5" />
++          </div>
++          <span className="text-lg font-semibold tracking-tight text-gray-900">
++            FestPass
++          </span>
++        </Link>
++
++        {/* Desktop nav */}
++        <nav className="hidden md:flex items-center gap-1">
++          {navLinks.map((link) => {
++            const isActive = pathname === link.href
++            return (
++              <Link
++                key={link.href}
++                href={link.href}
++                className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
++                  isActive
++                    ? "bg-indigo-50 text-indigo-700"
++                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
++                }`}
++              >
++                <link.icon className="h-4 w-4" />
++                {link.label}
++              </Link>
++            )
++          })}
++        </nav>
++
++        {/* Mobile toggle */}
++        <Button
++          variant="ghost"
++          size="icon"
++          className="md:hidden"
++          onClick={() => setMobileOpen(!mobileOpen)}
++        >
++          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
++        </Button>
++      </div>
++
++      {/* Mobile menu */}
++      {mobileOpen && (
++        <div className="border-t bg-white px-4 py-3 md:hidden">
++          <nav className="flex flex-col gap-1">
++            {navLinks.map((link) => {
++              const isActive = pathname === link.href
++              return (
++                <Link
++                  key={link.href}
++                  href={link.href}
++                  onClick={() => setMobileOpen(false)}
++                  className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
++                    isActive
++                      ? "bg-indigo-50 text-indigo-700"
++                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
++                  }`}
++                >
++                  <link.icon className="h-4 w-4" />
++                  {link.label}
++                </Link>
++              )
++            })}
++          </nav>
++        </div>
++      )}
++    </header>
++  )
++}

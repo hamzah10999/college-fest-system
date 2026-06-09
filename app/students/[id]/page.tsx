@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Download, Share2, CheckCircle, XCircle } from "lucide-react"
+import { Download, Share2, CheckCircle, XCircle, Users } from "lucide-react"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 
@@ -19,6 +19,14 @@ interface Student {
   validated: boolean
 }
 
+const roleBadge: Record<string, string> = {
+  participant: "bg-indigo-50 text-indigo-700 border-indigo-200",
+  volunteer: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  organizer: "bg-violet-50 text-violet-700 border-violet-200",
+  judge: "bg-amber-50 text-amber-700 border-amber-200",
+  sponsor: "bg-rose-50 text-rose-700 border-rose-200",
+}
+
 export default function StudentDetailPage({ params }: { params: { id: string } }) {
   const [student, setStudent] = useState<Student | null>(null)
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("")
@@ -26,7 +34,6 @@ export default function StudentDetailPage({ params }: { params: { id: string } }
   const { toast } = useToast()
 
   useEffect(() => {
-    // Load student data from API
     fetchStudent()
   }, [params.id])
 
@@ -34,12 +41,8 @@ export default function StudentDetailPage({ params }: { params: { id: string } }
     try {
       const response = await fetch(`/api/students/${params.id}`)
       const data = await response.json()
-
-      if (response.ok) {
-        setStudent(data.student)
-      } else {
-        setStudent(null)
-      }
+      if (response.ok) setStudent(data.student)
+      else setStudent(null)
     } catch (error) {
       console.error("Error fetching student:", error)
       setStudent(null)
@@ -47,42 +50,24 @@ export default function StudentDetailPage({ params }: { params: { id: string } }
   }
 
   useEffect(() => {
-    if (student && canvasRef.current) {
-      generateQRCode()
-    }
+    if (student && canvasRef.current) generateQRCode()
   }, [student])
 
   const generateQRCode = () => {
     if (!student || !canvasRef.current) return
-
     const canvas = canvasRef.current
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    // Set canvas size
     canvas.width = 300
     canvas.height = 300
-
-    // Clear canvas
     ctx.fillStyle = "white"
     ctx.fillRect(0, 0, 300, 300)
 
-    // Create QR code pattern (simplified version)
-    const qrData = JSON.stringify({
-      id: student.id,
-      name: student.name,
-      role: student.role,
-      college: student.college,
-    })
+    const qrData = JSON.stringify({ id: student.id, name: student.name, role: student.role, college: student.college })
+    const hash = qrData.split("").reduce((a, b) => { a = (a << 5) - a + b.charCodeAt(0); return a & a }, 0)
 
-    // Generate a simple pattern based on the data
-    const hash = qrData.split("").reduce((a, b) => {
-      a = (a << 5) - a + b.charCodeAt(0)
-      return a & a
-    }, 0)
-
-    // Draw QR-like pattern
-    ctx.fillStyle = "black"
+    ctx.fillStyle = "#312e81" // indigo-900
     const cellSize = 10
     const gridSize = 25
 
@@ -95,95 +80,63 @@ export default function StudentDetailPage({ params }: { params: { id: string } }
       }
     }
 
-    // Add corner markers
     const drawCornerMarker = (x: number, y: number) => {
-      ctx.fillStyle = "black"
+      ctx.fillStyle = "#312e81"
       ctx.fillRect(x, y, 70, 70)
       ctx.fillStyle = "white"
       ctx.fillRect(x + 10, y + 10, 50, 50)
-      ctx.fillStyle = "black"
+      ctx.fillStyle = "#312e81"
       ctx.fillRect(x + 20, y + 20, 30, 30)
     }
 
-    drawCornerMarker(25, 25) // Top-left
-    drawCornerMarker(205, 25) // Top-right
-    drawCornerMarker(25, 205) // Bottom-left
+    drawCornerMarker(25, 25)
+    drawCornerMarker(205, 25)
+    drawCornerMarker(25, 205)
 
-    // Convert to data URL
     const dataUrl = canvas.toDataURL("image/png")
     setQrCodeDataUrl(dataUrl)
   }
 
   const downloadQRCode = () => {
     if (!qrCodeDataUrl || !student) return
-
     const link = document.createElement("a")
     link.download = `${student.name}-QRCode.png`
     link.href = qrCodeDataUrl
     link.click()
-
-    toast({
-      title: "QR Code Downloaded",
-      description: "QR code has been saved to your device",
-    })
+    toast({ title: "QR Code Downloaded", description: "Saved to your device" })
   }
 
   const shareQRCode = async () => {
     if (!qrCodeDataUrl || !student) return
-
     try {
-      // Convert data URL to blob
       const response = await fetch(qrCodeDataUrl)
       const blob = await response.blob()
       const file = new File([blob], `${student.name}-QRCode.png`, { type: "image/png" })
-
       if (navigator.share && navigator.canShare({ files: [file] })) {
         await navigator.share({
-          title: `${student.name} - College Fest QR Code`,
+          title: `${student.name} — FestPass QR Code`,
           text: `QR Code for ${student.name} (${student.id})`,
           files: [file],
         })
       } else {
-        // Fallback: copy to clipboard
         await navigator.clipboard.writeText(`Student ID: ${student.id}\nName: ${student.name}\nRole: ${student.role}`)
-        toast({
-          title: "Copied to Clipboard",
-          description: "Student details copied to clipboard",
-        })
+        toast({ title: "Copied to clipboard", description: "Student details copied" })
       }
-    } catch (error) {
-      toast({
-        title: "Share Failed",
-        description: "Unable to share QR code",
-        variant: "destructive",
-      })
+    } catch {
+      toast({ title: "Share failed", description: "Unable to share QR code", variant: "destructive" })
     }
-  }
-
-  const getRoleBadgeColor = (role: string) => {
-    const colors = {
-      participant: "bg-blue-100 text-blue-800",
-      volunteer: "bg-green-100 text-green-800",
-      organizer: "bg-purple-100 text-purple-800",
-      judge: "bg-orange-100 text-orange-800",
-      sponsor: "bg-red-100 text-red-800",
-    }
-    return colors[role as keyof typeof colors] || "bg-gray-100 text-gray-800"
   }
 
   if (!student) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-        <div className="container mx-auto max-w-2xl">
-          <Link href="/students" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Students
-          </Link>
-          <Card className="text-center py-12">
+      <div className="page-bg">
+        <div className="container mx-auto max-w-lg px-4 py-16">
+          <Card className="text-center py-16">
             <CardContent>
-              <p className="text-gray-500 text-lg">Student not found</p>
+              <Users className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500 mb-4">Student not found</p>
               <Link href="/students">
-                <Button className="mt-4">Back to Students</Button>
+                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">Back to Students</Button>
               </Link>
             </CardContent>
           </Card>
@@ -193,59 +146,45 @@ export default function StudentDetailPage({ params }: { params: { id: string } }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="container mx-auto max-w-4xl">
-        <Link href="/students" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Students
-        </Link>
-
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Student Details */}
+    <div className="page-bg">
+      <div className="container mx-auto max-w-4xl px-4 py-12">
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Student Info */}
           <Card>
             <CardHeader>
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="text-2xl">{student.name}</CardTitle>
-                  <CardDescription className="font-mono text-lg mt-1">{student.id}</CardDescription>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <CardTitle className="text-xl">{student.name}</CardTitle>
+                  <CardDescription className="font-mono text-sm mt-1">{student.id}</CardDescription>
                 </div>
                 {student.validated ? (
-                  <div className="flex items-center text-green-600">
-                    <CheckCircle className="h-6 w-6 mr-2" />
-                    <span className="font-semibold">Validated</span>
-                  </div>
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1 shrink-0">
+                    <CheckCircle className="h-3.5 w-3.5" /> Validated
+                  </span>
                 ) : (
-                  <div className="flex items-center text-gray-500">
-                    <XCircle className="h-6 w-6 mr-2" />
-                    <span className="font-semibold">Pending</span>
-                  </div>
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-100 border border-gray-200 rounded-full px-2.5 py-1 shrink-0">
+                    <XCircle className="h-3.5 w-3.5" /> Pending
+                  </span>
                 )}
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Badge className={getRoleBadgeColor(student.role)} variant="secondary">
-                  {student.role.charAt(0).toUpperCase() + student.role.slice(1)}
-                </Badge>
-              </div>
+            <CardContent className="space-y-5">
+              <Badge variant="outline" className={roleBadge[student.role] || ""}>
+                {student.role.charAt(0).toUpperCase() + student.role.slice(1)}
+              </Badge>
 
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">College</p>
-                  <p className="text-lg">{student.college}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Email</p>
-                  <p className="text-lg">{student.email}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Phone</p>
-                  <p className="text-lg">{student.phone}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Registration Date</p>
-                  <p className="text-lg">{new Date(student.registeredAt).toLocaleDateString()}</p>
-                </div>
+              <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
+                {[
+                  { label: "College", value: student.college },
+                  { label: "Email", value: student.email },
+                  { label: "Phone", value: student.phone },
+                  { label: "Registered", value: new Date(student.registeredAt).toLocaleDateString() },
+                ].map((field) => (
+                  <div key={field.label}>
+                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-0.5">{field.label}</p>
+                    <p className="text-gray-900 break-all">{field.value}</p>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -253,35 +192,29 @@ export default function StudentDetailPage({ params }: { params: { id: string } }
           {/* QR Code */}
           <Card>
             <CardHeader>
-              <CardTitle>QR Code</CardTitle>
-              <CardDescription>Scan this code for entry validation</CardDescription>
+              <CardTitle className="text-lg">QR Code</CardTitle>
+              <CardDescription>Show this at the fest gate for validation</CardDescription>
             </CardHeader>
-            <CardContent className="text-center space-y-4">
-              <div className="bg-white p-4 rounded-lg inline-block shadow-sm">
-                <canvas
-                  ref={canvasRef}
-                  className="border border-gray-200 rounded"
-                  style={{ maxWidth: "100%", height: "auto" }}
-                />
+            <CardContent className="text-center space-y-5">
+              <div className="inline-block rounded-xl border bg-white p-4 shadow-sm">
+                <canvas ref={canvasRef} className="rounded" style={{ maxWidth: "100%", height: "auto" }} />
               </div>
 
-              <div className="flex gap-2 justify-center">
-                <Button onClick={downloadQRCode} variant="outline">
-                  <Download className="h-4 w-4 mr-2" />
-                  Download
+              <div className="flex gap-2.5 justify-center">
+                <Button variant="outline" onClick={downloadQRCode} size="sm">
+                  <Download className="h-4 w-4 mr-1.5" /> Download
                 </Button>
-                <Button onClick={shareQRCode} variant="outline">
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Share
+                <Button variant="outline" onClick={shareQRCode} size="sm">
+                  <Share2 className="h-4 w-4 mr-1.5" /> Share
                 </Button>
               </div>
 
-              <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-                <p className="font-medium mb-1">QR Code Contains:</p>
-                <p>• Student ID: {student.id}</p>
-                <p>• Name: {student.name}</p>
-                <p>• Role: {student.role}</p>
-                <p>• College: {student.college}</p>
+              <div className="text-xs text-gray-500 bg-gray-50 rounded-lg p-3 text-left space-y-0.5">
+                <p className="font-medium text-gray-600 mb-1">QR Code contains:</p>
+                <p>Student ID: {student.id}</p>
+                <p>Name: {student.name}</p>
+                <p>Role: {student.role}</p>
+                <p>College: {student.college}</p>
               </div>
             </CardContent>
           </Card>
